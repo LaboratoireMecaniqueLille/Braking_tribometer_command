@@ -1,0 +1,68 @@
+Capteurs:
+  - Vitesse
+    Analog (0-10V)? depuis le variateur
+    gain ~= 413 rpm/V
+    # Mesure Spectrum + LJ T7
+  - Couple
+    Conditionné par GMBH
+    gain ~= 50 Nm/V
+    # Mesure Spectrum + LJ T7
+  - Fressort
+    Conditionné par GMBH
+    gain ~= 2.06 kN/V
+    # Mesure (Spectrum)? LJ T7
+  - Fpatinxyz
+    3 conditionneurs Kistler
+    gain 500 N/V
+    #Mesure Spectrum (+ LJ T7/T7PRO)?
+  - Top-tour
+    Front montant (10V)?
+    # Mesure Spectrum + Trig camera
+  - Capteur battement
+    Conditionnement ??
+    # Mesure Spectrum
+  - Trig/début essai ?
+    AO Labjack
+    # Mesure Spectrum (pour la synchro)
+
+Commandes:
+  - Vitesse broche
+    TDAC(0)? LJ T7
+    gain ~= 412
+    # vers variateur broche
+  - Mode Patin
+    Serie ttyS4
+    pour switcher position fixe/tension de commande
+    # Entrée série variateur kollmorgen
+  - Position patin
+    TDAC(1)? LJ T7
+    gain? (pid)
+    -> PID: Fpatin:
+      Register 46000
+      Commande d'effort pour le patin (N)
+      Règle la position pour avoir F donné
+    # Entrée analogique vario Kollmorgen
+  - Hydrau distributeur A:
+    FIO2 LJ T7
+    Pour la commande du vérin
+    # Commande Distributeur A groupe hydrau
+  - Hydrau distributeur B:
+    FIO3 LJ T7
+    Pour la commande du vérin
+    # Commande Distributeur B groupe hydrau
+  Note:
+  sortie: FIO2=1,FIO3=1 / tempo / FIO3=0
+  entrée: (FIO2=1),FIO3=1 / tempo / FIO2=0 / tempo / FIO3=0
+  - Trig camera
+    Boitier arduino ?
+    # Vers camera
+
+
+Genrators:
+  - Status
+  - Broche
+  - Mode patin=>comment ??
+  - Effort patin
+  - Position patin?
+  - HydrauA
+  - HydrauB

@@ -1,0 +1,9 @@
+Gain commande broche:
+ - 412.7 t/min/V (10V)
+ - 413 t/min/V (7.5V)
+ - 412.5 t/min/V (5V)
+ - 411.4 t/min/V (2.5V)
+ - 411.34 t/min/V (1.25V)
+
+Gain mesure broche:
+ - 413 t/min/V (2.5V)
