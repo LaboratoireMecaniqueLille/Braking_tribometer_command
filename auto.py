@@ -1,35 +1,55 @@
 #coding: utf-8
 from __future__ import print_function, division
-import warnings
 
 from crappy import blocks, condition, start, link
+import warnings
 warnings.filterwarnings("ignore",".*GUI is implemented.*")
 
 # ========= Definition of the simples functions to expose to the user
 def goto(speed,delay=5):
   return {'type':'goto','speed':speed,'delay':delay}
 
-def slow(force,speed,inertia=10):
+def wait(delay):
+  return {'type':'wait','delay':delay}
+
+def slow(force,inertia=5,speed=0): #inertia in kgm², speed in rpm
   return {'type':'slow','speed':speed,'force':force,'inertia':inertia}
+
+def slow_p(pos,inertia=5,speed=0):
+  return {'type':'slow_p','speed':speed,'pos':pos,'inertia':inertia}
 
 def cst_f(force,delay):
   return {'type':'cst_F','force':force,'delay':delay}
+
+def cst_c(torque,delay):
+  return {'type':'cst_C','torque':torque,'delay':delay}
+
+def cst_p(pos,delay):
+  return {'type':'cst_P','pos':pos,'delay':delay}
+# ==================
+
+
 # ======== Definition of the path by the user
 
-path = [goto(5),slow(500,0),goto(500),cst_f(400,3),slow(500,0)]
+#path = [goto(500),cst_f(400,3),slow(500,5,300),goto(500),slow(400,2)]
+#path = [goto(500),cst_c(20,10),wait(5),slow_p(-2000)]
+#path = [goto(500),cst_c(20,10),wait(10),goto(0),wait(10)]
+path = [goto(500),cst_p(-2000,5),slow_p(-2500)]
 
-path.append({'type':'ending'})
+#path = [goto(500),cst_c(20,30),cst_f(100,5)]
+#path = [goto(1000),slow(800,0,5)]
+#path = [goto(500),cst_f(200,5),cst_f(500,5)]
 
-print("path=",path)
+path.append({'type':'end'})
+
 for d,n in zip(path[:-1],path[1:]):
-  if not "force" in d:
+  if d['type'] in ['goto','wait']:
     if "force" in n:
-      d["force"] = n["force"]
-    else:
-      d["force"] = 0
-
-print("path=",path)
-
+      d['force'] = n['force']
+    elif "pos" in n:
+      d['pos'] = n['pos']
+    elif 'torque' in n:
+      d['force'] = 20*n['torque'] # Rule of thumbs to preload the spring
 
 # ===== Block that will simply print the status at each step in the terminal
 
@@ -42,86 +62,167 @@ class Status_printer(blocks.MasterBlock):
     print(self.d[self.inputs[0].recv()['step']])
 
 state = [] # Path for the state generator (increment after each substep)
-speed = [] # Path for the motor
-force = [] # Path for the pad analog input
-force_mode = [] # Path for switching on and off the PID
-pad_pos = [] # To control the pad mode and set the position
-hydrau = [] # To drive the hydraulic actuator
+speed_list = [] # Path for the motor
+force_list = [] # Path for the pad analog input
+force_mode_list = [] # Path for switching on and off the PID
+pad_pos_list = [] # To control the pad mode and set the position
+hydrau_list = [] # To drive the hydraulic actuator
 
 
 status_printer = [] # List of each substep to print the current step
 
 
-i = 0
+# ====== The functions that will turn each path into the path for the actuators
+def make_goto(speed,delay,force=0,pos=0):
+  i = len(state)
+  # Acceleration
+  if last_step["speed"] < speed:
+    state.append({'condition':'rpm(t/min)>'+str(.99*speed),'value':i})
+  else:
+    state.append({'condition':'rpm(t/min)<'+str(1.01*speed),'value':i})
+  status_printer.append("Accelerating")
+  i += 1
+  # Stabilisation
+  state.append({'condition':'delay='+str(delay),'value':i})
+  status_printer.append("Stabilisating speed")
+  # Common path (for acceleration and stabilisation)
+  speed_list.append({'type':'constant','value':speed,
+                'condition':'step>'+str(i)})
+  force_list.append({'type':'constant','value':force,
+                'condition':'step>'+str(i)})
+  force_mode_list.append({'type':'constant','value':int(bool(force)),
+                      'condition':'step>'+str(i)})
+  if force != 0:
+    pad_pos_list.append({'type':'constant','value':False,
+                    'condition':'step>'+str(i)})
+  else:
+    pad_pos_list.append(
+        {'type':'constant','value':pos,'condition':'step>'+str(i)})
+  hydrau_list.append({'type':'constant','value':1,'condition':'step>'+str(i)})
+
+def make_wait(delay,force=0,pos=0):
+  i = len(state)
+  state.append({'condition':'delay='+str(delay),'value':i})
+  status_printer.append("Waiting...")
+  speed_list.append({'type':'constant', 'condition':'step>'+str(i)})
+  force_list.append({'type':'constant','value':force,
+                'condition':'step>'+str(i)})
+  force_mode_list.append({'type':'constant','value':int(bool(force)),
+                      'condition':'step>'+str(i)})
+  if force != 0:
+    pad_pos_list.append({'type':'constant','value':False,
+                    'condition':'step>'+str(i)})
+  else:
+    pad_pos_list.append(
+        {'type':'constant','value':pos,'condition':'step>'+str(i)})
+  hydrau_list.append({'type':'constant','value':1,'condition':'step>'+str(i)})
+
+def make_slow(force,inertia,speed):
+  # Next step when we reach the lowest point
+  i = len(state)
+  state.append({'condition':'rpm(t/min)<'+str(speed),'value':i})
+  status_printer.append(
+    "Breaking down to speed {} with inertia simulation".format(
+    speed))
+  speed_list.append({'type':'inertia','flabel':'C(Nm)','inertia':inertia,
+                'condition':'step>'+str(i)})
+  force_list.append({'type':'constant','value':force,
+                'condition':'step>'+str(i)})
+  force_mode_list.append(
+      {'type':'constant','value':1,'condition':'step>'+str(i)})
+  pad_pos_list.append(
+      {'type':'constant','value':False,'condition':'step>'+str(i)})
+  hydrau_list.append({'type':'constant','value':0,'condition':'step>'+str(i)})
+
+def make_slowp(pos,inertia,speed):
+  # Next step when we reach the lowest point
+  i = len(state)
+  state.append({'condition':'rpm(t/min)<'+str(speed),'value':i})
+  status_printer.append(
+    "Breaking down to speed {} with inertia simulation".format(
+    speed))
+  speed_list.append({'type':'inertia','flabel':'C(Nm)','inertia':inertia,
+                'condition':'step>'+str(i)})
+  force_list.append({'type':'constant','value':0,
+                'condition':'step>'+str(i)})
+  force_mode_list.append(
+      {'type':'constant','value':1,'condition':'step>'+str(i)})
+  pad_pos_list.append(
+      {'type':'constant','value':pos,'condition':'step>'+str(i)})
+  hydrau_list.append({'type':'constant','value':0,'condition':'step>'+str(i)})
+
+def make_cstf(force,delay):
+  i = len(state)
+  state.append({'condition':'delay='+str(delay),'value':i})
+  status_printer.append("Breaking with constant force")
+  speed_list.append({'type':'constant','condition':'step>'+str(i)})
+  force_list.append({'type':'constant','value':force,
+                'condition':'step>'+str(i)})
+  force_mode_list.append(
+      {'type':'constant','value':1,'condition':'step>'+str(i)})
+  pad_pos_list.append(
+      {'type':'constant','value':False,'condition':'step>'+str(i)})
+  hydrau_list.append({'type':'constant','value':0,'condition':'step>'+str(i)})
+
+def make_cstc(torque,delay):
+  i = len(state)
+  state.append({'condition':'delay='+str(delay),'value':i})
+  status_printer.append("Breaking with constant torque")
+  speed_list.append({'type':'constant','condition':'step>'+str(i)})
+  force_list.append({'type':'constant','value':torque,
+                'condition':'step>'+str(i)})
+  force_mode_list.append(
+      {'type':'constant','value':2,'condition':'step>'+str(i)})
+  pad_pos_list.append(
+      {'type':'constant','value':False,'condition':'step>'+str(i)})
+  hydrau_list.append({'type':'constant','value':0,'condition':'step>'+str(i)})
+
+def make_cstp(pos,delay):
+  i = len(state)
+  state.append({'condition':'delay='+str(delay),'value':i})
+  status_printer.append("Breaking with constant position")
+  speed_list.append({'type':'constant','condition':'step>'+str(i)})
+  force_list.append({'type':'constant','value':0,
+                'condition':'step>'+str(i)})
+  force_mode_list.append(
+      {'type':'constant','value':0,'condition':'step>'+str(i)})
+  pad_pos_list.append(
+      {'type':'constant','value':pos,'condition':'step>'+str(i)})
+  hydrau_list.append({'type':'constant','value':0,'condition':'step>'+str(i)})
+
+def make_end():
+  delay = 'delay=1'
+  state.append({'condition':delay,'value':len(state)})
+  status_printer.append("End")
+  speed_list.append({'type':'constant','value':0,'condition':delay})
+  force_list.append({'type':'constant','value':0,'condition':delay})
+  force_mode_list.append({'type':'constant','value':0,'condition':delay})
+  pad_pos_list.append({'type':'constant','value':0,'condition':delay})
+  hydrau_list.append({'type':'constant','value':1,'condition':delay})
+
+avail = {'goto':make_goto,
+         'wait':make_wait,
+         'slow':make_slow,
+         'slow_p':make_slowp,
+         'cst_F':make_cstf,
+         'cst_C':make_cstc,
+         'cst_P':make_cstp,
+         'end':make_end}
+
+
 last_step = {"speed":0}
 for step in path:
-  print(step)
-  if step['type'] == 'goto':
-    # Acceleration
-    if last_step["speed"] < step["speed"]:
-      state.append({'condition':'rpm(t/min)>'+str(.99*step['speed']),'value':i})
-    else:
-      state.append({'condition':'rpm(t/min)<'+str(1.01*step['speed']),'value':i})
-    status_printer.append("Accelerating")
-    i += 1
-    # Stabilisation
-    state.append({'condition':'delay='+str(step['delay']),'value':i})
-    status_printer.append("Stabilisating speed")
-    speed.append({'type':'constant','value':step['speed'],
-                  'condition':'step>'+str(i)})
-    #force.append({'type':'constant','value':0,'condition':'step>'+str(i)})
-    #force_mode.append({'type':'constant','value':0,'condition':'step>'+str(i)})
-    force.append({'type':'constant','value':step["force"],
-                  'condition':'step>'+str(i)})
-    force_mode.append({'type':'constant','value':1,'condition':'step>'+str(i)})
-
-    if step["force"] != 0:
-      pad_pos.append({'type':'constant','value':False,
-                      'condition':'step>'+str(i)})
-    else:
-      pad_pos.append({'type':'constant','value':0,'condition':'step>'+str(i)})
-    hydrau.append({'type':'constant','value':1,'condition':'step>'+str(i)})
-    i += 1
-  elif step['type'] == 'slow':
-    # Next step when we reach the lowest point
-    state.append({'condition':'rpm(t/min)<'+str(step['speed']),'value':i})
-    status_printer.append(
-      "Breaking down to speed {} with inertia simulation".format(
-      step['speed']))
-    speed.append({'type':'inertia','flabel':'C(Nm)','inertia':step['inertia'],
-                  'condition':'step>'+str(i)})
-    force.append({'type':'constant','value':step['force'],
-                  'condition':'step>'+str(i)})
-    force_mode.append({'type':'constant','value':1,'condition':'step>'+str(i)})
-    pad_pos.append({'type':'constant','value':False,'condition':'step>'+str(i)})
-    hydrau.append({'type':'constant','value':0,'condition':'step>'+str(i)})
-    i+=1
-  elif step['type'] == 'cst_F':
-    state.append({'condition':'delay='+str(step['delay']),'value':i})
-    status_printer.append("Breaking with constant force")
-    speed.append({'type':'constant','condition':'step>'+str(i)})
-    force.append({'type':'constant','value':step['force'],
-                  'condition':'step>'+str(i)})
-    force_mode.append({'type':'constant','value':1,'condition':'step>'+str(i)})
-    pad_pos.append({'type':'constant','value':False,'condition':'step>'+str(i)})
-    hydrau.append({'type':'constant','value':0,'condition':'step>'+str(i)})
-    i+=1
-  elif step['type'] == 'ending':
-    delay = 'delay=1'
-    state.append({'condition':delay,'value':i})
-    status_printer.append("End")
-    speed.append({'type':'constant','value':0,'condition':delay})
-    force.append({'type':'constant','value':0,'condition':delay})
-    force_mode.append({'type':'constant','value':0,'condition':delay})
-    pad_pos.append({'type':'constant','value':0,'condition':delay})
-    hydrau.append({'type':'constant','value':0,'condition':delay})
-  last_step = step
+  t = step.pop("type")
+  if t in avail:
+    avail[t](**step)
+  else:
+    print("Unknown path:",t)
+  last_step.update(step)
 
 
 for d in state:
   d['type'] = 'constant'
 
-#"""
 def display_state():
   for d,s in zip(state,status_printer):
     print(" ",s)
@@ -134,16 +235,17 @@ def display(l):
 print("State:")
 display_state()
 print("Speed:")
-display(speed)
+display(speed_list)
 print("Force:")
-display(force)
+display(force_list)
 print("Force mode:")
-display(force_mode)
+display(force_mode_list)
 print("Pad pos:")
-display(pad_pos)
+display(pad_pos_list)
 print("Hydrau:")
-display(hydrau)
+display(hydrau_list)
 #"""
+
 
 step_gen = blocks.Generator(state,cmd_label="step",verbose=True)
 sp = Status_printer(status_printer)
@@ -154,16 +256,16 @@ graph_step = blocks.Grapher(('t(s)','step'))
 link(step_gen,graph_step)
 
 
-speed_gen = blocks.Generator(speed,cmd_label="speed_cmd")
+speed_gen = blocks.Generator(speed_list,cmd_label="speed_cmd",freq=400)
 link(step_gen,speed_gen,condition=condition.Trig_on_change("step"))
 
-force_gen = blocks.Generator(force,cmd_label="f_cmd")
+force_gen = blocks.Generator(force_list,cmd_label="f_cmd")
 link(step_gen,force_gen,condition=condition.Trig_on_change("step"))
 
-fmode_gen = blocks.Generator(force_mode,cmd_label="fmode")
+fmode_gen = blocks.Generator(force_mode_list,cmd_label="fmode")
 link(step_gen,fmode_gen,condition=condition.Trig_on_change("step"))
 
-padpos_gen = blocks.Generator(pad_pos,cmd_label="pad")
+padpos_gen = blocks.Generator(pad_pos_list,cmd_label="pad")
 link(step_gen,padpos_gen,condition=condition.Trig_on_change("step"))
 
 t = .2
@@ -171,9 +273,9 @@ tempo = "delay="+str(t)
 tempo2 = "delay="+str(2*t)
 hydrau_path_fio2 = [
     {'type':'constant','value':1,'condition':'hydrau<1'}, #Sorti, jusqu'à 0
-    {'type':'constant','value':1,'condition':tempo}, # Attendre avant de rentrer
-    {'type':'constant','value':0,'condition':tempo}, # Rentrer, attendre la fin
-    {'type':'constant','value':0,'condition':'hydrau>0'}, # Avant de recommencer
+    {'type':'constant','value':1,'condition':tempo}, #Attendre avant de rentrer
+    {'type':'constant','value':0,'condition':tempo}, #Rentrer, attendre la fin
+    {'type':'constant','value':0,'condition':'hydrau>0'}, #Avant de recommencer
     ]
 
 hydrau_path_fio3 = [
@@ -186,19 +288,19 @@ hydrau_path_fio3 = [
 gen_fio2 = blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='h2')
 gen_fio3 = blocks.Generator(hydrau_path_fio3,repeat=True,cmd_label='h3')
 
-gen_hydrau = blocks.Generator(hydrau,cmd_label="hydrau")
+gen_hydrau = blocks.Generator(hydrau_list,cmd_label="hydrau",cmd=1)
 link(gen_hydrau,gen_fio2)
 link(gen_hydrau,gen_fio3)
 link(step_gen,gen_hydrau,condition=condition.Trig_on_change("step"))
 
-gen_pad = blocks.Generator(pad_pos,cmd_label="pad")
+gen_pad = blocks.Generator(pad_pos_list,cmd_label="pad")
 link(step_gen,gen_pad,condition=condition.Trig_on_change("step"))
 
 
 lj = blocks.IOBlock("Labjack_t7",identifier="470012972",channels=[
-  {'name':'TDAC0','gain':1/412},
+  {'name':'TDAC0','gain':1/412,'make_zero':False},
   {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
-  {'name':'AIN1','gain':413,'make_zero':True}, # rpm
+  {'name':'AIN1','gain':413,'make_zero':False}, # rpm
   {'name':'AIN2','gain':-50,'make_zero':True}, # torque
   {'name':'FIO2','direction':True}, # Hydrau
   {'name':'FIO3','direction':True}, # ..
@@ -220,7 +322,9 @@ servostar = blocks.Machine([{"type":"Servostar","cmd":"pad","mode":"position",
                             "device":"/dev/ttyS4"}])
 link(padpos_gen,servostar)
 
-graph = blocks.Grapher(('t(s)','F(N)'),('t(s)','C(Nm)'),('t(s)','rpm(t/min)'))
+graph = blocks.Grapher(('t(s)','F(N)'),('t(s)','rpm(t/min)'))
+graphC = blocks.Grapher(('t(s)','C(Nm)'))
+link(lj,graphC)
 link(lj,graph)
 
 start()
