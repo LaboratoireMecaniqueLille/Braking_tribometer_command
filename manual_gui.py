@@ -59,7 +59,7 @@ tempo_hydrau = .2
 lj1 = crappy.inout.Labjack_t7(identifier="470012972",channels=[
   {'name':'TDAC0','gain':1/412},
   {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
-  {'name':'AIN1','gain':413,'make_zero':True}, # rpm
+  {'name':'AIN1','gain':413,'make_zero':False}, # rpm
   {'name':'AIN2','gain':-50,'make_zero':True}, # torque
   {'name':'FIO2','direction':True}, # Hydrau
   {'name':'FIO3','direction':True}, # ..
