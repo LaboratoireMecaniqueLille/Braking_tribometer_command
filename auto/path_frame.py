@@ -2,9 +2,7 @@
 
 import Tkinter as tk
 
-HELP = """HELP:
-
-The above frame is used to describe each step of the test.
+HELP = """This frame is used to describe each step of the test.
 You can use the functions in the list, click them to have a help message.
 Double click to automatically add them at the end.
 Some arguments are facultative and can be omitted
@@ -14,6 +12,7 @@ Do not skip multiple lines between functions
 You can append N times a succession of functions using this syntax:
   [func1(args),func2(args),...]*N
 """
+
 def proto(f):
   """To create a clean readable representation of the function
 
@@ -24,45 +23,67 @@ def proto(f):
       l[-i-1] = l[-i-1][:-1] + "="+str(d)+">"
   return f.__name__ + "(" + ",".join(l) + ")"
 
+def flatten(l):
+  """
+  l is a list, if l contains lists, each item of this list
+  will be inserted in l at the place where the list was
+  Ex: [a,b,[c,d],e] => [a,b,c,d,e]
+  NOTE: If l contains strings with [ or ] they will be removed but this is
+  not the case here.
+  (I am aware that this is extremely ugly and probably inefficient,
+  but it is short, simple and works for what we are doing...)
+  """
+  return eval("["+str(l).replace("[","").replace("]","")+"]")
 
 class PathFrame(tk.Frame):
+  """
+  This frame holds all the widgets to manage the path for the test.
+  """
   def __init__(self,root,funcs,text=None):
     tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
     self.root = root
+    self.out = root.output
     self.funcs = funcs
-    self.textbox = tk.Text(self,width=80,height=10)
-    self.textbox.grid(row=0,column=0,columnspan=3)
+    self.textbox = tk.Text(self,width=50,height=10)
+    self.textbox.grid(row=0,column=0)
+    self.textbox.bind('<1>',lambda *a: self.out(HELP))
     self.path_list = tk.Listbox(self)
-    self.path_list.grid(row=1,column=0,rowspan=2,sticky=tk.N)
+    self.path_list.grid(row=0,column=1)
     self.path_list.insert(tk.END,*[f.__name__ for f in self.funcs])
     self.path_list.bind("<<ListboxSelect>>",self.update_help)
     self.path_list.bind("<Double-1>",self.append_path)
-    self.help_txt = tk.Text(self,width=60,height=10,
-        state=tk.DISABLED,wrap=tk.WORD)
-    self.help_txt.grid(row=1,column=1,columnspan=2)
-    self.help_txt.bind("<1>",self.print_help)
-    self.print_help()
-
-    self.load_button = tk.Button(self,text="Load")
-    self.save_button = tk.Button(self,text="Save")
-    self.load_button.grid(row=2,column=1)
-    self.save_button.grid(row=2,column=2)
 
   def update_help(self,event=None):
+    """
+    Callback for selection of path in path_list.
+
+    Gets the selected function and prints associated help in help_txt.
+    """
     i = self.path_list.curselection()[0]
     s = proto(self.funcs[i])
     s += "\n"+self.funcs[i].__doc__.strip()
-    self.set_help(s)
+    self.out(s)
 
   def append_path(self,event=None):
+    """
+    Callback for double click on path in path_list.
+
+    Will insert the selected path at the end of the textbox.
+    """
     i = self.path_list.curselection()[0]
-    self.textbox.insert(tk.END,"\n"+proto(self.funcs[i]))
+    self.textbox.insert(tk.END,proto(self.funcs[i])+"\n")
 
-  def print_help(self,event=None):
-    self.set_help(HELP)
+  def get_path(self):
+    try:
+      a = flatten(eval("["+",".join(self.textbox.get("1.0",tk.END).strip().split("\n")).replace(",,",",")+"]"))
+    except Exception as e:
+      print("Error during eval():",e)
+      a = None
+    return a
 
-  def set_help(self,s):
-    self.help_txt.configure(state=tk.NORMAL)
-    self.help_txt.delete("1.0",tk.END)
-    self.help_txt.insert("1.0",s)
-    self.help_txt.configure(state=tk.DISABLED)
+  def get_config(self):
+    return self.textbox.get("1.0",tk.END)
+
+  def set_config(self,config):
+    self.textbox.delete("1.0",tk.END)
+    self.textbox.insert(tk.END,config)
