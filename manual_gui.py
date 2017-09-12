@@ -156,6 +156,7 @@ for r in servo_mode_radio:
 servo_field = tk.Entry(root)
 servo_field.grid()
 servo_field.bind("<Return>",update_servo)
+servo_field.bind("<KP_Enter>",update_servo)
 
 pos_label = tk.Label(root)
 pos_label.grid()
@@ -166,6 +167,7 @@ graph.grid()
 speed_field = tk.Entry(root)
 speed_field.grid()
 speed_field.bind("<Return>",update_speed)
+speed_field.bind("<KP_Enter>",update_speed)
 
 hout_button = tk.Button(root,text="hydrau out",command=hydrau_out)
 hout_button.grid()
