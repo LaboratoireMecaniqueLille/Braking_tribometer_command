@@ -36,7 +36,6 @@ def read_ui(evt=None):
 avail = [goto,slow]
 
 def update_infos(event=None):
-  #print("You chose",path_list.get(int(path_list.curselection()[0])))
   i = int(path_list.curselection()[0])
   s = proto(avail[i])
   s += "\n"+avail[i].__doc__.strip()
@@ -53,12 +52,14 @@ def flatten(l):
   NOTE: If l contains strings with [ or ] they will be removed but this is
   not the case here.
   (I am aware that this is extremely ugly and probably inefficient,
-  but it is short and simple...)
+  but it is short, simple and works for what we are doing...)
   """
   return eval("["+str(l).replace("[","").replace("]","")+"]")
 
 def proto(f):
-  """To create a clean readable representation of the function"""
+  """To create a clean readable representation of the function
+
+  Ex: myfunc(<arg1>,<arg2>,<arg3=None>)"""
   l = ["<"+n+">" for n in f.func_code.co_varnames]
   if f.__defaults__:
     for i,d in enumerate(reversed(f.__defaults__)):
