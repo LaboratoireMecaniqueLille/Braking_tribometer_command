@@ -1,4 +1,5 @@
 #coding: utf-8
+__all__ = ["goto","wait","slow","slow_p","cst_f","cst_p","cst_c","avail"]
 
 # ========= Definition of the simples functions to expose to the user
 def goto(speed,delay=5):

@@ -3,8 +3,9 @@
 import Tkinter as tk
 
 class LJFrame(tk.Frame):
-  def __init__(self,root,chan_list={}):
+  def __init__(self,root):
     tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
+    self.name = "lj"
     self.root = root
     self.out = self.root.output
     self.listbox = tk.Listbox(self)
@@ -15,9 +16,7 @@ class LJFrame(tk.Frame):
     self.edit_button.grid(row=2,column=2)
     self.del_button = tk.Button(self,text="Delete",command=self.del_chan)
     self.del_button.grid(row=5,column=4)
-    self.chan_list = chan_list
-    for c in chan_list:
-      self.listbox.insert(tk.END,c['lbl']+": "+str(c['chan']))
+    self.chan_list = []
 
     tk.Label(self,text="Label").grid(row=0,column=0)
     self.t_lbl = tk.Entry(self)

@@ -3,7 +3,8 @@
 import Tkinter as tk
 
 class GraphFrame(tk.Frame):
-  def __init__(self,root,labels_getter,graphs={}):
+  def __init__(self,root,labels_getter):
+    self.name = "graph"
     self.get_labels = labels_getter
     self.out = root.output
     tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
@@ -27,8 +28,6 @@ class GraphFrame(tk.Frame):
     self.labels = self.get_labels()
     self.graph_dict = {}
     self.curr_graph = None
-    if graphs:
-      self.set_config(graphs)
 
   def set_config(self,graphs):
     self.graph_list.delete(0,tk.END)
@@ -38,6 +37,9 @@ class GraphFrame(tk.Frame):
     self.graph_dict = graphs
     for g in self.graph_dict:
       self.graph_list.insert(tk.END,g)
+
+  def get_config(self):
+    return self.graph_dict
 
   ## CALLBACKS
   def select_graph(self,event=None):

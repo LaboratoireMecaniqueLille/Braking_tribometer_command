@@ -2,7 +2,7 @@
 
 import Tkinter as tk
 
-from funcs import avail
+from funcs import *
 
 HELP = """This frame is used to describe each step of the test.
 You can use the functions in the list, click them to have a help message.
@@ -41,7 +41,8 @@ class PathFrame(tk.Frame):
   """
   This frame holds all the widgets to manage the path for the test.
   """
-  def __init__(self,root,text=None):
+  def __init__(self,root):
+    self.name = "path"
     tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
     self.root = root
     self.out = root.output
@@ -54,8 +55,6 @@ class PathFrame(tk.Frame):
     self.path_list.insert(tk.END,*[f.__name__ for f in self.funcs])
     self.path_list.bind("<<ListboxSelect>>",self.update_help)
     self.path_list.bind("<Double-1>",self.append_path)
-    if text:
-      self.set_config(text)
 
   def update_help(self,event=None):
     """
