@@ -7,14 +7,15 @@
 from __future__ import print_function
 
 import pickle
-
+from os import path
 import Tkinter as tk
 from tkFileDialog import askopenfilename,asksaveasfilename
+
+# Frames
 from path_frame import PathFrame
 from spectrum_frame import SpectrumFrame
 from lj_frame import LJFrame
 from graph_frame import GraphFrame
-from funcs import avail
 
 root = tk.Tk()
 
@@ -32,15 +33,22 @@ def output(s):
 
 root.output = output
 
-path_frame = PathFrame(root,avail)
+default_file = path.join(path.dirname(path.abspath(__file__)),"default.p")
+
+try:
+  with open(default_file,"rb") as f:
+    default = pickle.load(f)
+except Exception as e:
+  print("Could not load default config: ",e)
+  default = {'path':None,'lj':None,'spectrum':None,"graph":None}
+
+path_frame = PathFrame(root,default['path'])
 path_frame.grid(row=0,column=0)
 
-lj_frame = LJFrame(root,
-    [{'lbl':'T1','chan':'AIN0','range':10,'offset':0,'zero':False,'gain':1.5}])
+lj_frame = LJFrame(root, default['lj'])
 lj_frame.grid(row=1,column=0)
 
-spectrum_frame = SpectrumFrame(root,
-    [{'lbl':'C(Nm)','chan':'1','range':10,'gain':2}])
+spectrum_frame = SpectrumFrame(root,default['spectrum'])
 spectrum_frame.grid(row=0,column=1)
 
 def get_labels():
@@ -48,8 +56,8 @@ def get_labels():
       + [d['lbl'] for d in spectrum_frame.chan_list]
   assert len(set(l)) == len(l),"Duplicate label!"
   return l
-test = {'Graph1':['C(Nm)'],'Graph2':['T1']}
-graph_frame = GraphFrame(root,get_labels,test)
+#test = {'Graph1':['C(Nm)'],'Graph2':['T1']}
+graph_frame = GraphFrame(root,get_labels,default['graph'])
 graph_frame.grid(row=1,column=1)
 
 def load_conf():
@@ -85,15 +93,19 @@ def load_conf():
   top = tk.Toplevel()
   top.title("Load")
   var_path = tk.IntVar()
+  var_path.set(1)
   check_path = tk.Checkbutton(top,text="Path",var=var_path)
   check_path.grid(row=1,column=0)
   var_lj = tk.IntVar()
+  var_lj.set(1)
   check_lj = tk.Checkbutton(top,text="Labjack",var=var_lj)
   check_lj.grid(row=2,column=0)
   var_spectrum = tk.IntVar()
+  var_spectrum.set(1)
   check_spectrum = tk.Checkbutton(top,text="Spectrum",var=var_spectrum)
   check_spectrum.grid(row=3,column=0)
   var_graph = tk.IntVar()
+  var_graph.set(1)
   check_graph = tk.Checkbutton(top,text="Graph",var=var_graph)
   check_graph.grid(row=4,column=0)
   cancel = tk.Button(top,text='Cancel',command=top.destroy)
@@ -104,7 +116,7 @@ def load_conf():
 
 def save_conf():
   def save():
-    path = asksaveasfilename(filetypes = (("Pickles","*.p"),("All files","*.*")))
+    path = asksaveasfilename(filetypes=(("Pickles","*.p"),("All files","*.*")))
     if var_path.get():
       config["path"] = path_frame.textbox.get('1.0',tk.END)
     if var_lj.get():
@@ -122,15 +134,19 @@ def save_conf():
   top = tk.Toplevel()
   top.title("Save")
   var_path = tk.IntVar()
+  var_path.set(1)
   check_path = tk.Checkbutton(top,text="Path",var=var_path)
   check_path.grid(row=1,column=0)
   var_lj = tk.IntVar()
+  var_lj.set(1)
   check_lj = tk.Checkbutton(top,text="Labjack",var=var_lj)
   check_lj.grid(row=2,column=0)
   var_spectrum = tk.IntVar()
+  var_spectrum.set(1)
   check_spectrum = tk.Checkbutton(top,text="Spectrum",var=var_spectrum)
   check_spectrum.grid(row=3,column=0)
   var_graph = tk.IntVar()
+  var_graph.set(1)
   check_graph = tk.Checkbutton(top,text="Graph",var=var_graph)
   check_graph.grid(row=4,column=0)
   cancel = tk.Button(top,text='Cancel',command=top.destroy)

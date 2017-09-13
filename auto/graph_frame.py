@@ -27,14 +27,17 @@ class GraphFrame(tk.Frame):
     self.labels = self.get_labels()
     self.graph_dict = {}
     self.curr_graph = None
+    if graphs:
+      self.set_config(graphs)
 
   def set_config(self,graphs):
+    self.graph_list.delete(0,tk.END)
     for labels in self.graph_dict.values():
       for l in labels:
         assert l in self.labels,"This label is not defined: "+l
+    self.graph_dict = graphs
     for g in self.graph_dict:
       self.graph_list.insert(tk.END,g)
-    self.graph_dict = graphs
 
   ## CALLBACKS
   def select_graph(self,event=None):
@@ -50,7 +53,7 @@ class GraphFrame(tk.Frame):
       i+=1
     s = "Graph%d"%i
     self.graph_dict[s] = []
-    self.graph_list.insert(0,s)
+    self.graph_list.insert(tk.END,s)
     return s
 
   def del_graph(self):

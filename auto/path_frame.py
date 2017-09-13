@@ -2,6 +2,8 @@
 
 import Tkinter as tk
 
+from funcs import avail
+
 HELP = """This frame is used to describe each step of the test.
 You can use the functions in the list, click them to have a help message.
 Double click to automatically add them at the end.
@@ -39,11 +41,11 @@ class PathFrame(tk.Frame):
   """
   This frame holds all the widgets to manage the path for the test.
   """
-  def __init__(self,root,funcs,text=None):
+  def __init__(self,root,text=None):
     tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
     self.root = root
     self.out = root.output
-    self.funcs = funcs
+    self.funcs = avail
     self.textbox = tk.Text(self,width=50,height=10)
     self.textbox.grid(row=0,column=0)
     self.textbox.bind('<1>',lambda *a: self.out(HELP))
@@ -52,6 +54,8 @@ class PathFrame(tk.Frame):
     self.path_list.insert(tk.END,*[f.__name__ for f in self.funcs])
     self.path_list.bind("<<ListboxSelect>>",self.update_help)
     self.path_list.bind("<Double-1>",self.append_path)
+    if text:
+      self.set_config(text)
 
   def update_help(self,event=None):
     """
@@ -75,13 +79,15 @@ class PathFrame(tk.Frame):
 
   def get_path(self):
     try:
-      a = flatten(eval("["+",".join(self.textbox.get("1.0",tk.END).strip().split("\n")).replace(",,",",")+"]"))
+      a = flatten(eval("["+",".join(self.textbox.get(
+        "1.0",tk.END).strip().split("\n")).replace(",,",",")+"]"))
     except Exception as e:
       print("Error during eval():",e)
       a = None
     return a
 
   def get_config(self):
+    self.get_path() # To make sure the path is correct
     return self.textbox.get("1.0",tk.END)
 
   def set_config(self,config):
