@@ -4,26 +4,29 @@ import Tkinter as tk
 
 class GraphFrame(tk.Frame):
   def __init__(self,root,labels_getter):
+    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
     self.name = "graph"
     self.get_labels = labels_getter
     self.out = root.output
-    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
+    self.title = tk.Label(self,text=self.name.capitalize(),
+        font=("Helvetica",20))
+    self.title.grid(row=0,column=0,columnspan=10)
     self.graph_list = tk.Listbox(self,height=5,selectmode=tk.SINGLE)
-    self.graph_list.grid(row=0,column=0,columnspan=2)
+    self.graph_list.grid(row=1,column=0,columnspan=2)
     self.graph_list.bind("<<ListboxSelect>>",self.select_graph)
     self.b_add = tk.Button(self,text="+",command=self.add_graph)
-    self.b_add.grid(row=1,column=0)
+    self.b_add.grid(row=2,column=0)
     self.b_remove = tk.Button(self,text='-',command=self.del_graph)
-    self.b_remove.grid(row=1,column=1)
+    self.b_remove.grid(row=2,column=1)
 
     self.graph_label_list = tk.Listbox(self)
-    self.graph_label_list.grid(row=0,column=2,rowspan=3)
+    self.graph_label_list.grid(row=1,column=2,rowspan=3)
     self.b_left = tk.Button(self,text='<-',command=self.label_to_graph)
-    self.b_left.grid(row=0,column=3)
+    self.b_left.grid(row=1,column=3)
     self.b_right = tk.Button(self,text='->',command=self.graph_to_label)
-    self.b_right.grid(row=1,column=3)
+    self.b_right.grid(row=2,column=3)
     self.label_list = tk.Listbox(self)
-    self.label_list.grid(row=0,column=4,rowspan=3)
+    self.label_list.grid(row=1,column=4,rowspan=3)
 
     self.labels = self.get_labels()
     self.graph_dict = {}

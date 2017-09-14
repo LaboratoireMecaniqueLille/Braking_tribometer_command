@@ -7,32 +7,35 @@ class SpectrumFrame(tk.Frame):
     tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
     self.name = "spectrum"
     self.root = root
+    self.title = tk.Label(self,text=self.name.capitalize(),
+        font=("Helvetica",20))
+    self.title.grid(row=0,column=0,columnspan=10)
     self.out = self.root.output
     self.listbox = tk.Listbox(self)
-    self.listbox.grid(row=0,column=3,rowspan=3,columnspan=2)
+    self.listbox.grid(row=1,column=3,rowspan=3,columnspan=2)
     self.edit_button = tk.Button(self,text="<-",command=self.edit_chan)
-    self.edit_button.grid(row=2,column=2)
+    self.edit_button.grid(row=3,column=2)
     self.add_button = tk.Button(self,text="->",command=self.add_chan)
-    self.add_button.grid(row=1,column=2)
+    self.add_button.grid(row=2,column=2)
     self.del_button = tk.Button(self,text="Delete",command=self.del_chan)
-    self.del_button.grid(row=3,column=4)
+    self.del_button.grid(row=4,column=4)
     self.chan_list = []
 
-    tk.Label(self,text="Label").grid(row=0,column=0)
+    tk.Label(self,text="Label").grid(row=1,column=0)
     self.t_lbl = tk.Entry(self)
-    self.t_lbl.grid(row=0,column=1)
+    self.t_lbl.grid(row=1,column=1)
 
-    tk.Label(self,text="Channel").grid(row=1,column=0)
+    tk.Label(self,text="Channel").grid(row=2,column=0)
     self.t_chan= tk.Entry(self)
-    self.t_chan.grid(row=1,column=1)
+    self.t_chan.grid(row=2,column=1)
 
-    tk.Label(self,text="Range").grid(row=2,column=0)
+    tk.Label(self,text="Range").grid(row=3,column=0)
     self.t_range = tk.Entry(self)
-    self.t_range.grid(row=2,column=1)
+    self.t_range.grid(row=3,column=1)
 
-    tk.Label(self,text="Gain").grid(row=3,column=0)
+    tk.Label(self,text="Gain").grid(row=4,column=0)
     self.t_gain = tk.Entry(self)
-    self.t_gain.grid(row=3,column=1)
+    self.t_gain.grid(row=4,column=1)
 
   def get_entry(self):
     d = {}
