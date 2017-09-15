@@ -52,6 +52,8 @@ class Graph(object):
     ax.relim()
     ax.autoscale_view(True, True, True)
 
+  def end(self):
+    plt.close()
 
 tempo_hydrau = .2
 #lj1 = crappy.inout.Labjack_t7(identifier="470012972",
@@ -65,6 +67,8 @@ lj1 = crappy.inout.Labjack_t7(identifier="470012972",channels=[
   {'name':'FIO3','direction':True}, # ..
   ])
 lj1.open()
+
+go = True
 
 def enable_pid():
   #if not lj1.read(6000):
@@ -104,18 +108,22 @@ def update_speed(event=None):
   lj1.set_cmd(float(speed_field.get()))
 
 def end(event=None):
-  servostar.close()
-  #lj1.close()
-  root.destroy()
+  global go
+  go = False
 
 def update():
   pos_label.configure(text=str(servostar.get_position())+" µm")
   t,f,v,c = lj1.get_data()
-  #print("DEBUG",t,f,v,c)
   graph.plot(t,f,0)
   graph.plot(t,v,1)
   graph.plot(t,c,2)
-  root.after(50,update)
+  if go:
+    root.after(50,update)
+  else:
+    servostar.close()
+    lj1.close()
+    graph.end()
+    root.destroy()
 
 def hydrau_out():
   lj1["FIO2"] = 1
@@ -181,6 +189,7 @@ hydrau_label = tk.Label(root)
 hydrau_label.grid()
 
 
-#hydrau_in()
+hydrau_out()
+
 root.after(50,update)
 root.mainloop()
