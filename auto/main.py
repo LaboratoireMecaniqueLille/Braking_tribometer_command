@@ -14,11 +14,13 @@ from spectrum_frame import SpectrumFrame
 from lj_frame import LJFrame
 from graph_frame import GraphFrame
 from load_frame import LoadFrame
+from launch import launch
 
 root = tk.Tk()
 
 help_txt = tk.Text(width=80,height=15)
 help_txt.grid(row=2,column=0)
+d = []
 
 def output(s):
   """
@@ -54,7 +56,20 @@ frames = [path_frame,lj_frame,spectrum_frame,graph_frame]
 load_frame = LoadFrame(root, frames)
 load_frame.grid(row=2,column=1)
 
-go = tk.Button(root,text="GO!")
+def go():
+  d[:] = []
+  d.append(path_frame.get_path())
+  d.append(spectrum_frame.get_config())
+  d.append(lj_frame.get_config())
+  d.append(graph_frame.get_config())
+  root.destroy()
+  print("GO DONE")
+
+go = tk.Button(root,text="GO!",command=go)
 go.grid(row=3,column=1)
 
 root.mainloop()
+e = list(d)
+
+launch(*e)
+
