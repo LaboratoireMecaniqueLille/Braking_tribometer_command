@@ -62,14 +62,32 @@ def go():
   d.append(spectrum_frame.get_config())
   d.append(lj_frame.get_config())
   d.append(graph_frame.get_config())
+  d.append(save_dir_entry.get())
   root.destroy()
-  print("GO DONE")
 
 go = tk.Button(root,text="GO!",command=go)
-go.grid(row=3,column=1)
+go.grid(row=3,column=2)
+
+# Save dir
+from tkFileDialog import askdirectory
+def choose_dir():
+  #global save_dir
+  r = askdirectory()
+  if r:
+    #save_dir = r
+    save_dir_entry.delete(0,tk.END)
+    save_dir_entry.insert(0,r)
+
+save_dir = '/home/tribo'
+save_dir_entry = tk.Entry(root)
+save_dir_entry.insert(0,save_dir)
+save_dir_entry.grid(row=3,column=0)
+save_dir_button = tk.Button(root,text="...",command=choose_dir)
+save_dir_button.grid(row=3,column=1)
+
 
 root.mainloop()
-e = list(d)
 
-launch(*e)
-
+if d:
+  e = list(d)
+  launch(*e)
