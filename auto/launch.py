@@ -219,15 +219,13 @@ def launch(path,spectrum,lj,graph):
   display(hydrau_list)
   #"""
 
-
   step_gen = blocks.Generator(state,cmd_label="step",verbose=True)
   sp = Status_printer(status_printer)
   link(step_gen,sp,condition=condition.Trig_on_change("step"))
 
 
-  graph_step = blocks.Grapher(('t(s)','step'))
+  graph_step = blocks.Grapher(('t(s)','step'),backend="qt4agg")
   link(step_gen,graph_step)
-
 
   speed_gen = blocks.Generator(speed_list,cmd_label="speed_cmd",freq=400)
   link(step_gen,speed_gen,condition=condition.Trig_on_change("step"))
@@ -291,14 +289,13 @@ def launch(path,spectrum,lj,graph):
   link(lj,speed_gen)
   link(lj,step_gen)
 
+
   servostar = blocks.Machine([{"type":"Servostar","cmd":"pad","mode":"position",
                               "device":"/dev/ttyS4"}])
   link(padpos_gen,servostar)
-
-  graph = blocks.Grapher(('t(s)','F(N)'),('t(s)','rpm(t/min)'))
+  graph = blocks.Grapher(('t(s)','F(N)'),('t(s)','rpm(t/min)'),backend="qt4agg")
   graphC = blocks.Grapher(('t(s)','C(Nm)'))
   link(lj,graphC)
   link(lj,graph)
-
 
   start()
