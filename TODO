@@ -1,7 +1,7 @@
 + Add saving path
-- Add default labels (read by lj1)
-- Add graphs
-  - Add label source detection
++ Add default labels (read by lj1)
+= Add graphs
+  + Add label source detection
   - Add spectrum downsampling (test efficiency)
     -> Add warning ?
 - Add Drawing configuration
