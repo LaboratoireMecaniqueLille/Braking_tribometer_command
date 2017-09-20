@@ -33,6 +33,7 @@ class GraphFrame(tk.Frame):
     self.curr_graph = None
 
   def set_config(self,graphs):
+    self.labels = self.get_labels()
     self.graph_list.delete(0,tk.END)
     for labels in self.graph_dict.values():
       for l in labels:
