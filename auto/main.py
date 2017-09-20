@@ -15,6 +15,7 @@ from lj_frame import LJFrame
 from graph_frame import GraphFrame
 from load_frame import LoadFrame
 from launch import launch
+from lj1_chan import in_chan
 
 root = tk.Tk()
 
@@ -44,8 +45,12 @@ spectrum_frame.grid(row=0,column=1)
 
 def get_labels():
   l = [d['lbl'] for d in lj_frame.chan_list]\
-      + [d['lbl'] for d in spectrum_frame.chan_list]
-  assert len(set(l)) == len(l),"Duplicate label!"
+      + [d['lbl'] for d in spectrum_frame.chan_list]\
+      + in_chan.keys()
+  duplicates = [lbl for i,lbl in enumerate(l) if lbl in l[:i]]
+  if duplicates:
+    output("Duplicate label(s): "+str(duplicates))
+    return []
   return l
 
 graph_frame = GraphFrame(root,get_labels)

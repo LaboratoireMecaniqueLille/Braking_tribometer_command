@@ -11,8 +11,8 @@ class Status_printer(blocks.MasterBlock):
   def loop(self):
     print(self.d[self.inputs[0].recv()['step']])
 
-def launch(path,spectrum,lj,graph):
-  print("Let's go!",path,spectrum,lj,graph)
+def launch(path,spectrum,lj2,graph,save_dir):
+  print("Let's go!",path,spectrum,lj2,graph)
 
   # === Preparing path ====
 
@@ -29,16 +29,14 @@ def launch(path,spectrum,lj,graph):
       elif 'torque' in n:
         d['force'] = 20*n['torque'] # Rule of thumbs to preload the spring
 
-
-
   # ==== The functions that will turn each path into the path for the actuators
   def make_goto(speed,delay,force=0,pos=0):
     i = len(state)
     # Acceleration
     if last_step["speed"] < speed:
-      state.append({'condition':'rpm(t/min)>'+str(.99*speed),'value':i})
+      state.append({'condition':'lj1_rpm(t/min)>'+str(.99*speed),'value':i})
     else:
-      state.append({'condition':'rpm(t/min)<'+str(1.01*speed),'value':i})
+      state.append({'condition':'lj1_rpm(t/min)<'+str(1.01*speed),'value':i})
     status_printer.append("Accelerating")
     i += 1
     # Stabilisation
@@ -79,11 +77,11 @@ def launch(path,spectrum,lj,graph):
   def make_slow(force,inertia,speed):
     # Next step when we reach the lowest point
     i = len(state)
-    state.append({'condition':'rpm(t/min)<'+str(speed),'value':i})
+    state.append({'condition':'lj1_rpm(t/min)<'+str(speed),'value':i})
     status_printer.append(
       "Breaking down to speed {} with inertia simulation".format(
       speed))
-    speed_list.append({'type':'inertia','flabel':'C(Nm)','inertia':inertia,
+    speed_list.append({'type':'inertia','flabel':'lj1_C(Nm)','inertia':inertia,
                   'condition':'step>'+str(i)})
     force_list.append({'type':'constant','value':force,
                   'condition':'step>'+str(i)})
@@ -96,11 +94,11 @@ def launch(path,spectrum,lj,graph):
   def make_slowp(pos,inertia,speed):
     # Next step when we reach the lowest point
     i = len(state)
-    state.append({'condition':'rpm(t/min)<'+str(speed),'value':i})
+    state.append({'condition':'lj1_rpm(t/min)<'+str(speed),'value':i})
     status_printer.append(
       "Breaking down to speed {} with inertia simulation".format(
       speed))
-    speed_list.append({'type':'inertia','flabel':'C(Nm)','inertia':inertia,
+    speed_list.append({'type':'inertia','flabel':'lj1_C(Nm)','inertia':inertia,
                   'condition':'step>'+str(i)})
     force_list.append({'type':'constant','value':0,
                   'condition':'step>'+str(i)})
@@ -224,16 +222,16 @@ def launch(path,spectrum,lj,graph):
   link(step_gen,sp,condition=condition.Trig_on_change("step"))
 
 
-  graph_step = blocks.Grapher(('t(s)','step'),backend="qt4agg")
-  link(step_gen,graph_step)
+  #graph_step = blocks.Grapher(('t(s)','step'),backend="qt4agg")
+  #link(step_gen,graph_step)
 
-  speed_gen = blocks.Generator(speed_list,cmd_label="speed_cmd",freq=400)
+  speed_gen = blocks.Generator(speed_list,cmd_label="lj1_speed_cmd",freq=400)
   link(step_gen,speed_gen,condition=condition.Trig_on_change("step"))
 
-  force_gen = blocks.Generator(force_list,cmd_label="f_cmd")
+  force_gen = blocks.Generator(force_list,cmd_label="lj1_fcmd")
   link(step_gen,force_gen,condition=condition.Trig_on_change("step"))
 
-  fmode_gen = blocks.Generator(force_mode_list,cmd_label="fmode")
+  fmode_gen = blocks.Generator(force_mode_list,cmd_label="lj1_fmode")
   link(step_gen,fmode_gen,condition=condition.Trig_on_change("step"))
 
   padpos_gen = blocks.Generator(pad_pos_list,cmd_label="pad")
@@ -256,8 +254,8 @@ def launch(path,spectrum,lj,graph):
       {'type':'constant','value':1,'condition':tempo}, # fermer jusqu'à tempo
       ]
 
-  gen_fio2 = blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='h2')
-  gen_fio3 = blocks.Generator(hydrau_path_fio3,repeat=True,cmd_label='h3')
+  gen_fio2 = blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='lj1_h2')
+  gen_fio3 = blocks.Generator(hydrau_path_fio3,repeat=True,cmd_label='lj1_h3')
 
   gen_hydrau = blocks.Generator(hydrau_list,cmd_label="hydrau",cmd=1)
   link(gen_hydrau,gen_fio2)
@@ -267,35 +265,48 @@ def launch(path,spectrum,lj,graph):
   gen_pad = blocks.Generator(pad_pos_list,cmd_label="pad")
   link(step_gen,gen_pad,condition=condition.Trig_on_change("step"))
 
-
-  lj = blocks.IOBlock("Labjack_t7",identifier="470012972",channels=[
-    {'name':'TDAC0','gain':1/412,'make_zero':False},
-    {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
-    {'name':'AIN1','gain':413,'make_zero':False}, # rpm
-    {'name':'AIN2','gain':-50,'make_zero':True}, # torque
-    {'name':'FIO2','direction':True}, # Hydrau
-    {'name':'FIO3','direction':True}, # ..
-    {'name':46000,'direction':True},
-    {'name':46002,'direction':True},
-    ],labels=['t(s)','F(N)','rpm(t/min)','C(Nm)'],
-    cmd_labels=['speed_cmd','h2','h3','f_cmd','fmode'])
-
-  link(speed_gen,lj)
-  link(gen_fio2,lj)
-  link(gen_fio3,lj)
-  link(force_gen,lj)
-  link(fmode_gen,lj)
-
-  link(lj,speed_gen)
-  link(lj,step_gen)
-
-
   servostar = blocks.Machine([{"type":"Servostar","cmd":"pad","mode":"position",
                               "device":"/dev/ttyS4"}])
   link(padpos_gen,servostar)
-  graph = blocks.Grapher(('t(s)','F(N)'),('t(s)','rpm(t/min)'),backend="qt4agg")
-  graphC = blocks.Grapher(('t(s)','C(Nm)'))
-  link(lj,graphC)
-  link(lj,graph)
+
+  # Creating the first Labjack, config is read from lj1_chan.py
+  from lj1_chan import in_chan,out_chan,identifier
+  lj1_chan = []
+  lj1_labels = ['t(s)']
+  lj1_out_labels = []
+  for k,v in in_chan.iteritems():
+    lj1_chan.append(v)
+    lj1_labels.append(k)
+  for k,v in out_chan.iteritems():
+    lj1_chan.append(v)
+    lj1_out_labels.append(k)
+  print("DEBUG out",lj1_out_labels,"in",lj1_labels)
+  labjack1 = blocks.IOBlock("Labjack_t7",identifier=identifier,
+      channels=lj1_chan, labels=lj1_labels,cmd_labels=lj1_out_labels)
+
+  link(speed_gen,labjack1)
+  link(gen_fio2,labjack1)
+  link(gen_fio3,labjack1)
+  link(force_gen,labjack1)
+  link(fmode_gen,labjack1)
+
+  link(labjack1,speed_gen)
+  link(labjack1,step_gen)
+
+  # Creating the second Labjack
+
+  graphs = []
+  for g in graph.values():
+    graphs.append(blocks.Grapher(*[('t(s)',lbl) for lbl in g],backend='qt4agg'))
+    # Link to the concerned blocks
+    #if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):
+    #  print("Need to link graph to spectrum")
+    #  link(spectrum_block,graphs[-1],condition=downsample(1000))
+    #if any([lbl in [c['lbl'] for c in lj2] for lbl in g]):
+    #  print("Need to link graph to lj2")
+    #  link(labjack2,graphs[-1])
+    if any([lbl in in_chan.keys() for lbl in g]):
+      print("Need to link graph to lj1")
+      link(labjack1,graphs[-1])
 
   start()
