@@ -66,7 +66,7 @@ class LoadFrame(tk.Frame):
       check_vars[f.name].set(1)
       tk.Checkbutton(top,text=f.name.capitalize(),
           var=check_vars[f.name]).grid(row=i,column=0)
-      tk.Button(top,text="Load",command=load).grid(row=i+1,column=0)
+    tk.Button(top,text="Load",command=load).grid(row=i+1,column=0)
 
   def save_conf(self):
     def save():
@@ -90,4 +90,4 @@ class LoadFrame(tk.Frame):
       check_vars[f.name].set(1)
       tk.Checkbutton(top,text=f.name.capitalize(),
           var=check_vars[f.name]).grid(row=i,column=0)
-      tk.Button(top,text="Save",command=save).grid(row=i+1,column=0)
+    tk.Button(top,text="Save",command=save).grid(row=i+1,column=0)
