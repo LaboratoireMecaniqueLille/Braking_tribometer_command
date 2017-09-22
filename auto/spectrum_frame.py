@@ -47,7 +47,8 @@ class SpectrumFrame(tk.Frame):
     try:
       d['chan'] = int(d['chan'])
     except ValueError:
-      assert d['chan'], "Cannot use an empty chan"
+      self.out("Please use integer values for Spectrum channels")
+      return
     assert not d['chan'] in [i['chan'] for i in self.chan_list],\
         "Channel already in use!"
     if not self.t_range.get():
