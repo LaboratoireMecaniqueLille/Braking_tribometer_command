@@ -35,10 +35,12 @@ class GraphFrame(tk.Frame):
   def set_config(self,graphs):
     self.labels = self.get_labels()
     self.graph_list.delete(0,tk.END)
+    self.graph_dict = graphs
     for labels in self.graph_dict.values():
       for l in labels:
-        assert l in self.labels,"This label is not defined: "+l
-    self.graph_dict = graphs
+        if not l in self.labels:
+          self.graph_list = []
+          return "Error loading graph: This label is not defined: "+l
     for g in self.graph_dict:
       self.graph_list.insert(tk.END,g)
 

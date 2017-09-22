@@ -53,12 +53,12 @@ class LJFrame(tk.Frame):
     assert d['lbl'],"Cannot use an empty label"
     assert not d['lbl'] in [i['lbl'] for i in self.chan_list],\
         "Label already in use!"
-    d['chan'] = self.t_chan.get()
+    d['name'] = self.t_chan.get()
     try:
-      d['chan'] = int(d['chan'])
+      d['name'] = int(d['name'])
     except ValueError:
-      assert d['chan'], "Cannot use an empty chan"
-    assert not d['chan'] in [i['chan'] for i in self.chan_list],\
+      assert d['name'], "Cannot use an empty chan"
+    assert not d['name'] in [i['name'] for i in self.chan_list],\
         "Channel already in use!"
     if not self.t_range.get():
       self.t_range.insert(0,'10')
@@ -69,7 +69,7 @@ class LJFrame(tk.Frame):
     if not self.t_offset.get():
       self.t_offset.insert(0,'0')
     d['offset'] = float(self.t_offset.get())
-    d['zero'] = bool(self.c_zero_var.get())
+    d['make_zero'] = bool(self.c_zero_var.get())
     return d
 
   def add_chan(self,event=None):
@@ -79,7 +79,7 @@ class LJFrame(tk.Frame):
       self.out(e)
       return
     c = self.chan_list[-1]
-    self.listbox.insert(tk.END,c['lbl']+": "+str(c['chan']))
+    self.listbox.insert(tk.END,c['lbl']+": "+str(c['name']))
 
   def del_chan(self,event=None):
     try:
@@ -97,11 +97,11 @@ class LJFrame(tk.Frame):
       return
     replace = lambda f,s: (f.delete(0,tk.END),f.insert(0,str(s)))
     replace(self.t_lbl,d['lbl'])
-    replace(self.t_chan,d['chan'])
+    replace(self.t_chan,d['name'])
     replace(self.t_range,d['range'])
     replace(self.t_gain,d['gain'])
     replace(self.t_offset,d['offset'])
-    if d['zero']:
+    if d['make_zero']:
       self.c_zero.select()
     else:
       self.c_zero.deselect()
@@ -114,4 +114,4 @@ class LJFrame(tk.Frame):
     self.chan_list = config
     self.listbox.delete(0,tk.END)
     for c in config:
-      self.listbox.insert(tk.END,c['lbl']+": "+str(c['chan']))
+      self.listbox.insert(tk.END,c['lbl']+": "+str(c['name']))

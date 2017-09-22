@@ -280,7 +280,6 @@ def launch(path,spectrum,lj2,graph,save_dir):
   for k,v in out_chan.iteritems():
     lj1_chan.append(v)
     lj1_out_labels.append(k)
-  print("DEBUG out",lj1_out_labels,"in",lj1_labels)
   labjack1 = blocks.IOBlock("Labjack_t7",identifier=identifier,
       channels=lj1_chan, labels=lj1_labels,cmd_labels=lj1_out_labels)
 
@@ -293,18 +292,30 @@ def launch(path,spectrum,lj2,graph,save_dir):
   link(labjack1,speed_gen)
   link(labjack1,step_gen)
 
-  # Creating the second Labjack
+  # Creating the second Labjack
+  if lj2:
+    print("LJ2=",lj2)
+    lj2_labels = ['t(s)']
+    for c in lj2:
+      lj2_labels.append(c['lbl'])
+      del c['lbl']
+    print("lj2Lablels=",lj2_labels)
+    print("lj2 chan=",lj2)
+    labjack2 = blocks.IOBlock("Labjack_t7",identifier="470014418",
+        channels=lj2,labels=lj2_labels)
 
+  # Creating the graphs
   graphs = []
   for g in graph.values():
+    print("Graph:",g)
     graphs.append(blocks.Grapher(*[('t(s)',lbl) for lbl in g],backend='qt4agg'))
     # Link to the concerned blocks
     #if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):
     #  print("Need to link graph to spectrum")
     #  link(spectrum_block,graphs[-1],condition=downsample(1000))
-    #if any([lbl in [c['lbl'] for c in lj2] for lbl in g]):
-    #  print("Need to link graph to lj2")
-    #  link(labjack2,graphs[-1])
+    if any([lbl in lj2_labels for lbl in g]):
+      print("Need to link graph to lj2")
+      link(labjack2,graphs[-1])
     if any([lbl in in_chan.keys() for lbl in g]):
       print("Need to link graph to lj1")
       link(labjack1,graphs[-1])

@@ -44,7 +44,10 @@ class LoadFrame(tk.Frame):
       for f in self.frames:
         if auto or check_vars[f.name].get():
           if f.name in config:
-            f.set_config(config[f.name])
+            r = f.set_config(config[f.name])
+            if r:
+              self.out(r) # To print an error if any
+              return
           else:
             not_ok.append(f.name)
       if not_ok:
