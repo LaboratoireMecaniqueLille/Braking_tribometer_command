@@ -2,6 +2,7 @@
 from __future__ import division, print_function
 
 from crappy import blocks,start,condition,link
+from time import ctime
 
 class Status_printer(blocks.MasterBlock):
   def __init__(self,d):
@@ -11,8 +12,11 @@ class Status_printer(blocks.MasterBlock):
   def loop(self):
     print(self.d[self.inputs[0].recv()['step']])
 
-def launch(path,spectrum,lj2,graph,save_dir):
+def launch(path,spectrum,lj2,graph,savepath):
   print("Let's go!",path,spectrum,lj2,graph)
+  if savepath[-1] != "/":
+    savepath += "/"
+  savepath += ctime()[:-5].replace(" ","_")+"/"
 
   # === Preparing path ====
 
@@ -292,6 +296,44 @@ def launch(path,spectrum,lj2,graph,save_dir):
   link(labjack1,speed_gen)
   link(labjack1,step_gen)
 
+  # == And the associated saver
+  lj1_saver = blocks.Saver(savepath+"lj1.csv")
+  link(labjack1,lj1_saver)
+
+
+  # Creating the Spectrum block
+  spec_chan = []
+  spec_labels = []
+  spec_ranges = []
+  spec_gains = {}
+
+  for c in spectrum:
+    spec_chan.append(c['chan'])
+    spec_labels.append(c['lbl'])
+    c['range'] = int(1000*c['range']) # V to mV
+    spec_ranges.append(c['range']\
+        if c['range'] in [50,250,500,1000,2000,5000,10000] else 10000)
+    spec_gains[c['chan']] = c['gain']
+  if spectrum:
+    from spectrum_tools import HFSplit,check_chan
+    spec_chan,spec_labels,spec_ranges,spec_gains = \
+        check_chan(spec_chan,spec_labels,spec_ranges,spec_gains)
+
+    spectrum_block = blocks.IOBlock("spectrum",channels=spec_chan,
+        #labels=('t(s)',)+labels,
+        ranges=spec_ranges,
+        freq=100000, # ADD AN INPUT IN THE GUI !!
+        streamer=True)
+
+    spectrum_save = blocks.Hdf_saver(savepath+"spectrum.h5",
+        metadata={'channels':spec_chan,
+                  'names':spec_labels,
+                  'ranges':spec_ranges,
+                  'gains':[spec_gains[k] for k in sorted(spec_gains.keys())],
+                  'freq':100000, # TO CHANGE
+          })
+    link(spectrum_block,spectrum_save)
+
   # Creating the second Labjack
   if lj2:
     print("LJ2=",lj2)
@@ -304,15 +346,20 @@ def launch(path,spectrum,lj2,graph,save_dir):
     labjack2 = blocks.IOBlock("Labjack_t7",identifier="470014418",
         channels=lj2,labels=lj2_labels)
 
+    # == And the saver
+    lj2_saver = blocks.Saver(savepath+"lj2.csv")
+    link(labjack2,lj2_saver)
+
   # Creating the graphs
   graphs = []
   for g in graph.values():
     print("Graph:",g)
     graphs.append(blocks.Grapher(*[('t(s)',lbl) for lbl in g],backend='qt4agg'))
     # Link to the concerned blocks
-    #if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):
-    #  print("Need to link graph to spectrum")
-    #  link(spectrum_block,graphs[-1],condition=downsample(1000))
+    if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):
+      print("Need to link graph to spectrum")
+      link(spectrum_block,graphs[-1],
+        condition=HFSplit(spec_labels,spec_chan,spec_gains,spec_ranges))
     if any([lbl in lj2_labels for lbl in g]):
       print("Need to link graph to lj2")
       link(labjack2,graphs[-1])
