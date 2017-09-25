@@ -7,13 +7,12 @@ class HFSplit:
     self.index = index
     self.gains = [r*g/32000000 for g,r in zip(
       [gains[k] for k in sorted(gains.keys())],ranges)]
-    print("DEBUG got", gains,self.gains)
 
   def evaluate(self,data):
     r = {}
     r['t(s)'] = data['t(s)'][0]
     for l,i,g in zip(self.labels,self.index,self.gains):
-      r[l] = g*data['stream'][i,0]
+      r[l] = g*data['stream'][0,i]
     return r
 
 
