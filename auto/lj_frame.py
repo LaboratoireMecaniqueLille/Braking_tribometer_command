@@ -46,6 +46,11 @@ class LJFrame(tk.Frame):
     self.c_zero = tk.Checkbutton(self,variable=self.c_zero_var)
     self.c_zero.grid(row=6,column=1)
 
+    tk.Label(self,text="Frequency (Hz)").grid(row=7,column=1)
+    self.freq_entry = tk.Entry(self)
+    self.freq_entry.insert(0,"200")
+    self.freq_entry.grid(row=7,column=2)
+
 
   def get_entry(self):
     d = {}
@@ -108,10 +113,12 @@ class LJFrame(tk.Frame):
     self.del_chan()
 
   def get_config(self):
-    return self.chan_list
+    return float(self.freq_entry.get()),self.chan_list
 
   def set_config(self,config):
-    self.chan_list = config
+    freq,self.chan_list = config
     self.listbox.delete(0,tk.END)
-    for c in config:
+    for c in self.chan_list:
       self.listbox.insert(tk.END,c['lbl']+": "+str(c['name']))
+    self.freq_entry.delete(0,tk.END)
+    self.freq_entry.insert(0,str(freq))

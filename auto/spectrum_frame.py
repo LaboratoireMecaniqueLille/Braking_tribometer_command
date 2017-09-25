@@ -37,6 +37,11 @@ class SpectrumFrame(tk.Frame):
     self.t_gain = tk.Entry(self)
     self.t_gain.grid(row=4,column=1)
 
+    tk.Label(self,text="Frequency (kHz)").grid(row=7,column=1)
+    self.freq_entry = tk.Entry(self)
+    self.freq_entry.insert(0,"100")
+    self.freq_entry.grid(row=7,column=2)
+
   def get_entry(self):
     d = {}
     d['lbl'] = self.t_lbl.get()
@@ -90,10 +95,12 @@ class SpectrumFrame(tk.Frame):
     self.del_chan()
 
   def get_config(self):
-    return self.chan_list
+    return float(self.freq_entry.get()),self.chan_list
 
   def set_config(self,config):
-    self.chan_list = config
+    freq,self.chan_list = config
     self.listbox.delete(0,tk.END)
-    for c in config:
+    for c in self.chan_list:
       self.listbox.insert(tk.END,c['lbl']+": "+str(c['chan']))
+    self.freq_entry.delete(0,tk.END)
+    self.freq_entry.insert(0,str(freq))

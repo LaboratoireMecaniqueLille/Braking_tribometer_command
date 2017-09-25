@@ -221,7 +221,7 @@ def launch(path,spectrum,lj2,graph,savepath):
   display(hydrau_list)
   #"""
 
-  step_gen = blocks.Generator(state,cmd_label="step",verbose=True)
+  step_gen = blocks.Generator(state,cmd_label="step")
   sp = Status_printer(status_printer)
   link(step_gen,sp,condition=condition.Trig_on_change("step"))
 
@@ -307,6 +307,7 @@ def launch(path,spectrum,lj2,graph,savepath):
   spec_ranges = []
   spec_gains = {}
 
+  spectrum_freq,spectrum = spectrum
   for c in spectrum:
     spec_chan.append(c['chan'])
     spec_labels.append(c['lbl'])
@@ -319,10 +320,10 @@ def launch(path,spectrum,lj2,graph,savepath):
     spec_chan,spec_labels,spec_ranges,spec_gains = \
         check_chan(spec_chan,spec_labels,spec_ranges,spec_gains)
 
+    print("DEBUG freq",spectrum_freq)
     spectrum_block = blocks.IOBlock("spectrum",channels=spec_chan,
-        #labels=('t(s)',)+labels,
         ranges=spec_ranges,
-        freq=100000, # ADD AN INPUT IN THE GUI !!
+        samplerate=int(1000*spectrum_freq),
         streamer=True)
 
     spectrum_save = blocks.Hdf_saver(savepath+"spectrum.h5",
@@ -330,11 +331,13 @@ def launch(path,spectrum,lj2,graph,savepath):
                   'names':spec_labels,
                   'ranges':spec_ranges,
                   'gains':[spec_gains[k] for k in sorted(spec_gains.keys())],
-                  'freq':100000, # TO CHANGE
+                  'freq':int(1000*spectrum_freq),
           })
     link(spectrum_block,spectrum_save)
 
   # Creating the second Labjack
+  freq_lj2 = lj2[0]
+  lj2 = lj2[1]
   if lj2:
     print("LJ2=",lj2)
     lj2_labels = ['t(s)']
@@ -344,7 +347,7 @@ def launch(path,spectrum,lj2,graph,savepath):
     print("lj2Lablels=",lj2_labels)
     print("lj2 chan=",lj2)
     labjack2 = blocks.IOBlock("Labjack_t7",identifier="470014418",
-        channels=lj2,labels=lj2_labels)
+        channels=lj2,labels=lj2_labels,freq=freq_lj2,verbose=True)
 
     # == And the saver
     lj2_saver = blocks.Saver(savepath+"lj2.csv")
