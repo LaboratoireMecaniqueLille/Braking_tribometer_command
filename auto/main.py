@@ -70,20 +70,17 @@ def go():
   d.append(save_dir_entry.get())
   root.destroy()
 
-go = tk.Button(root,text="GO!",command=go)
-go.grid(row=3,column=2)
+tk.Button(root,text="GO!",command=go).grid(row=3,column=2)
 
 # Save dir
-from tkFileDialog import askdirectory
 def choose_dir():
-  #global save_dir
+  from tkFileDialog import askdirectory
   r = askdirectory()
   if r:
-    #save_dir = r
     save_dir_entry.delete(0,tk.END)
     save_dir_entry.insert(0,r)
 
-save_dir = '/home/tribo'
+save_dir = '/home/tribo/Bureau/essais'
 save_dir_entry = tk.Entry(root)
 save_dir_entry.insert(0,save_dir)
 save_dir_entry.grid(row=3,column=0)
