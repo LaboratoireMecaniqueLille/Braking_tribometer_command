@@ -41,20 +41,16 @@ class Popup(blocks.MasterBlock):
 
 class Bypass():
   """
-  This condition is used to bypass the status in case of cancelation
+  This condition is used to bypass the generator in case of cancelation
   """
   def __init__(self,pipe,value):
     self.p = pipe
     self.v = value
-    self.last = None
 
   def evaluate(self,d):
     if not self.p.poll():
-      if d['step'] != self.last:
-        self.last = d
-        return d
-    else:
-      return self.v
+      return d
+    return self.v
 
 def launch(path,spectrum,lj2,graph,savepath):
   print("Let's go!",path,spectrum,lj2,graph)
@@ -272,40 +268,40 @@ def launch(path,spectrum,lj2,graph,savepath):
 
 
   speed_gen = blocks.Generator(speed_list,cmd_label="lj1_speed_cmd",freq=300)
-  link(step_gen,speed_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
+  link(step_gen,speed_gen,condition=condition.Trig_on_change('step'))
 
   force_gen = blocks.Generator(force_list,cmd_label="lj1_fcmd")
-  link(step_gen,force_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
+  link(step_gen,force_gen,condition=condition.Trig_on_change('step'))
 
   fmode_gen = blocks.Generator(force_mode_list,cmd_label="lj1_fmode")
-  link(step_gen,fmode_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
+  link(step_gen,fmode_gen,condition=condition.Trig_on_change('step'))
 
   padpos_gen = blocks.Generator(pad_pos_list,cmd_label="pad")
-  link(step_gen,padpos_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
+  link(step_gen,padpos_gen,condition=condition.Trig_on_change('step'))
 
   t = .2
   tempo = "delay="+str(t)
   tempo2 = "delay="+str(2*t)
   hydrau_path_fio2 = [
-      {'type':'constant','value':1,'condition':'hydrau<1'}, #Sorti, jusqu'à 0
-      {'type':'constant','value':1,'condition':tempo}, #Attendre avant de rentrer
-      {'type':'constant','value':0,'condition':tempo}, #Rentrer, attendre la fin
-      {'type':'constant','value':0,'condition':'hydrau>0'}, #Avant de recommencer
+      {'type':'constant','value':0,'condition':'hydrau>0'}, # Consider it out
+      {'type':'constant','value':1,'condition':'hydrau<1'}, # Asking to retract
+      {'type':'constant','value':1,'condition':tempo}, # Wait...
+      {'type':'constant','value':0,'condition':tempo}, # Retract and wait
       ]
 
   hydrau_path_fio3 = [
-      {'type':'constant','value':0,'condition':'hydrau<1'}, # Ouvert
-      {'type':'constant','value':1,'condition':tempo2}, # fermer jusqu'à 2tempo
-      {'type':'constant','value':0,'condition':'hydrau>0'}, # refermer
-      {'type':'constant','value':1,'condition':tempo}, # fermer jusqu'à tempo
+      {'type':'constant','value':0,'condition':'hydrau>0'}, # We asked it out
+      {'type':'constant','value':1,'condition':tempo}, # Load...
+      {'type':'constant','value':0,'condition':'hydrau<1'}, # Now go
+      {'type':'constant','value':1,'condition':tempo2}, # Load again, to go in
       ]
 
   gen_fio2 = blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='lj1_h2')
   gen_fio3 = blocks.Generator(hydrau_path_fio3,repeat=True,cmd_label='lj1_h3')
 
   gen_hydrau = blocks.Generator(hydrau_list,cmd_label="hydrau",cmd=1)
-  link(gen_hydrau,gen_fio2)
-  link(gen_hydrau,gen_fio3)
+  link(gen_hydrau,gen_fio2,condition=Bypass(bp_p2,{'hydrau':1}))
+  link(gen_hydrau,gen_fio3,condition=Bypass(bp_p2,{'hydrau':1}))
   link(step_gen,gen_hydrau,condition=Bypass(bp_p2,{'step':len(state)-1}))
 
   gen_pad = blocks.Generator(pad_pos_list,cmd_label="pad")
@@ -329,11 +325,11 @@ def launch(path,spectrum,lj2,graph,savepath):
   labjack1 = blocks.IOBlock("Labjack_t7",identifier=identifier,
       channels=lj1_chan, labels=lj1_labels,cmd_labels=lj1_out_labels)
 
-  link(speed_gen,labjack1)
+  link(speed_gen,labjack1,condition=Bypass(bp_p2,{'lj1_speed_cmd':0}))
   link(gen_fio2,labjack1)
   link(gen_fio3,labjack1)
-  link(force_gen,labjack1)
-  link(fmode_gen,labjack1)
+  link(force_gen,labjack1,condition=Bypass(bp_p2,{'lj1_fcmd':0}))
+  link(fmode_gen,labjack1,condition=Bypass(bp_p2,{'lj1_fmode':0}))
 
   link(labjack1,speed_gen)
   link(labjack1,step_gen)
