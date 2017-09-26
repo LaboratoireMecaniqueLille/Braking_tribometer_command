@@ -1,25 +1,28 @@
 #coding: utf-8
 from __future__ import division, print_function
 
+from multiprocessing import Pipe
+
 from crappy import blocks,start,condition,link,stop
 from time import ctime,sleep
 
 import Tkinter as tk
 
 class Popup(blocks.MasterBlock):
-  def __init__(self,d):
+  """
+  The window that will allow to stop the test and give the current step
+  """
+  def __init__(self,d,pipe):
     blocks.MasterBlock.__init__(self)
     self.d = d
     self.freq = 2
+    self.pipe = pipe
 
   def prepare(self):
     self.root = tk.Tk()
     tk.Button(self.root,text="Stop",command=self.term).pack()
     self.label = tk.Label(self.root,text="Initializing...")
     self.label.pack()
-
-  def begin(self):
-    self.send({'step':0})
 
   def loop(self):
     if self.inputs[0].poll():
@@ -29,13 +32,29 @@ class Popup(blocks.MasterBlock):
     self.root.update()
 
   def term(self):
-    for _ in self.d:
-      self.send({'step':len(self.d)-1})
+    self.pipe.send(1)
     sleep(1)
     stop()
 
-  def finnish(self):
+  def finish(self):
     self.root.destroy()
+
+class Bypass():
+  """
+  This condition is used to bypass the status in case of cancelation
+  """
+  def __init__(self,pipe,value):
+    self.p = pipe
+    self.v = value
+    self.last = None
+
+  def evaluate(self,d):
+    if not self.p.poll():
+      if d['step'] != self.last:
+        self.last = d
+        return d
+    else:
+      return self.v
 
 def launch(path,spectrum,lj2,graph,savepath):
   print("Let's go!",path,spectrum,lj2,graph)
@@ -246,29 +265,23 @@ def launch(path,spectrum,lj2,graph,savepath):
   display(hydrau_list)
   #"""
 
-  step_gen = blocks.Generator(state,cmd_label="step")
-  popup = Popup(status_printer)
+  bp_p1,bp_p2 = Pipe()
+  step_gen = blocks.Generator(state,cmd_label="step",spam=True,freq=20)
+  popup = Popup(status_printer,bp_p1)
   link(step_gen,popup,condition=condition.Trig_on_change("step"))
 
 
-  #graph_step = blocks.Grapher(('t(s)','step'),backend="qt4agg")
-  #link(step_gen,graph_step)
-
   speed_gen = blocks.Generator(speed_list,cmd_label="lj1_speed_cmd",freq=300)
-  link(step_gen,speed_gen,condition=condition.Trig_on_change("step"))
-  link(popup,speed_gen)
+  link(step_gen,speed_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
 
   force_gen = blocks.Generator(force_list,cmd_label="lj1_fcmd")
-  link(step_gen,force_gen,condition=condition.Trig_on_change("step"))
-  link(popup,force_gen)
+  link(step_gen,force_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
 
   fmode_gen = blocks.Generator(force_mode_list,cmd_label="lj1_fmode")
-  link(step_gen,fmode_gen,condition=condition.Trig_on_change("step"))
-  link(popup,fmode_gen)
+  link(step_gen,fmode_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
 
   padpos_gen = blocks.Generator(pad_pos_list,cmd_label="pad")
-  link(step_gen,padpos_gen,condition=condition.Trig_on_change("step"))
-  link(popup,padpos_gen)
+  link(step_gen,padpos_gen,condition=Bypass(bp_p2,{'step':len(state)-1}))
 
   t = .2
   tempo = "delay="+str(t)
@@ -293,10 +306,10 @@ def launch(path,spectrum,lj2,graph,savepath):
   gen_hydrau = blocks.Generator(hydrau_list,cmd_label="hydrau",cmd=1)
   link(gen_hydrau,gen_fio2)
   link(gen_hydrau,gen_fio3)
-  link(step_gen,gen_hydrau,condition=condition.Trig_on_change("step"))
+  link(step_gen,gen_hydrau,condition=Bypass(bp_p2,{'step':len(state)-1}))
 
   gen_pad = blocks.Generator(pad_pos_list,cmd_label="pad")
-  link(step_gen,gen_pad,condition=condition.Trig_on_change("step"))
+  link(step_gen,gen_pad,condition=Bypass(bp_p2,{'step':len(state)-1}))
 
   servostar = blocks.Machine([{"type":"Servostar","cmd":"pad","mode":"position",
                               "device":"/dev/ttyS4"}])
