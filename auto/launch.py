@@ -1,16 +1,41 @@
 #coding: utf-8
 from __future__ import division, print_function
 
-from crappy import blocks,start,condition,link
-from time import ctime
+from crappy import blocks,start,condition,link,stop
+from time import ctime,sleep
 
-class Status_printer(blocks.MasterBlock):
+import Tkinter as tk
+
+class Popup(blocks.MasterBlock):
   def __init__(self,d):
     blocks.MasterBlock.__init__(self)
     self.d = d
+    self.freq = 2
+
+  def prepare(self):
+    self.root = tk.Tk()
+    tk.Button(self.root,text="Stop",command=self.term).pack()
+    self.label = tk.Label(self.root,text="Initializing...")
+    self.label.pack()
+
+  def begin(self):
+    self.send({'step':0})
 
   def loop(self):
-    print(self.d[self.inputs[0].recv()['step']])
+    if self.inputs[0].poll():
+      i = self.inputs[0].recv()['step']
+      print(self.d[i])
+      self.label.configure(text=self.d[i]+" (%d/%d)"%(i+1,len(self.d)))
+    self.root.update()
+
+  def term(self):
+    for _ in self.d:
+      self.send({'step':len(self.d)-1})
+    sleep(1)
+    stop()
+
+  def finnish(self):
+    self.root.destroy()
 
 def launch(path,spectrum,lj2,graph,savepath):
   print("Let's go!",path,spectrum,lj2,graph)
@@ -222,24 +247,28 @@ def launch(path,spectrum,lj2,graph,savepath):
   #"""
 
   step_gen = blocks.Generator(state,cmd_label="step")
-  sp = Status_printer(status_printer)
-  link(step_gen,sp,condition=condition.Trig_on_change("step"))
+  popup = Popup(status_printer)
+  link(step_gen,popup,condition=condition.Trig_on_change("step"))
 
 
   #graph_step = blocks.Grapher(('t(s)','step'),backend="qt4agg")
   #link(step_gen,graph_step)
 
-  speed_gen = blocks.Generator(speed_list,cmd_label="lj1_speed_cmd",freq=400)
+  speed_gen = blocks.Generator(speed_list,cmd_label="lj1_speed_cmd",freq=300)
   link(step_gen,speed_gen,condition=condition.Trig_on_change("step"))
+  link(popup,speed_gen)
 
   force_gen = blocks.Generator(force_list,cmd_label="lj1_fcmd")
   link(step_gen,force_gen,condition=condition.Trig_on_change("step"))
+  link(popup,force_gen)
 
   fmode_gen = blocks.Generator(force_mode_list,cmd_label="lj1_fmode")
   link(step_gen,fmode_gen,condition=condition.Trig_on_change("step"))
+  link(popup,fmode_gen)
 
   padpos_gen = blocks.Generator(pad_pos_list,cmd_label="pad")
   link(step_gen,padpos_gen,condition=condition.Trig_on_change("step"))
+  link(popup,padpos_gen)
 
   t = .2
   tempo = "delay="+str(t)
@@ -320,7 +349,6 @@ def launch(path,spectrum,lj2,graph,savepath):
     spec_chan,spec_labels,spec_ranges,spec_gains = \
         check_chan(spec_chan,spec_labels,spec_ranges,spec_gains)
 
-    print("DEBUG freq",spectrum_freq)
     spectrum_block = blocks.IOBlock("spectrum",channels=spec_chan,
         ranges=spec_ranges,
         samplerate=int(1000*spectrum_freq),
@@ -360,14 +388,11 @@ def launch(path,spectrum,lj2,graph,savepath):
     graphs.append(blocks.Grapher(*[('t(s)',lbl) for lbl in g],backend='qt4agg'))
     # Link to the concerned blocks
     if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):
-      print("Need to link graph to spectrum")
       link(spectrum_block,graphs[-1],
         condition=HFSplit(spec_labels,spec_chan,spec_gains,spec_ranges))
     if any([lbl in lj2_labels for lbl in g]):
-      print("Need to link graph to lj2")
       link(labjack2,graphs[-1])
     if any([lbl in in_chan.keys() for lbl in g]):
-      print("Need to link graph to lj1")
       link(labjack1,graphs[-1])
 
   start()
