@@ -24,11 +24,11 @@ def make_goto(speed,delay,force=0,pos=0):
   else:
     paths['state'].append(
         {'condition':'lj1_rpm(t/min)<'+str(1.01*speed),'value':i})
-  paths['status'].append("Accelerating")
+  paths['status'].append("Accelerating to %d rpm"%speed)
   i += 1
   # Stabilisation
   paths['state'].append({'condition':'delay='+str(delay),'value':i})
-  paths['status'].append("Stabilisating speed")
+  paths['status'].append("Stabilisating speed (%ds)"%delay)
   # Common path (for acceleration and stabilisation)
   paths['speed'].append({'type':'constant','value':speed,
                 'condition':'step>'+str(i)})
@@ -54,7 +54,7 @@ Will simply wait <delay> seconds
 def make_wait(delay,force=0,pos=0):
   i = len(paths['state'])
   paths['state'].append({'condition':'delay='+str(delay),'value':i})
-  paths['status'].append("Waiting...")
+  paths['status'].append("Waiting %d s..."%delay)
   paths['speed'].append({'type':'constant', 'condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':force,
                 'condition':'step>'+str(i)})
@@ -83,8 +83,8 @@ def make_slow(force,inertia,speed):
   i = len(paths['state'])
   paths['state'].append({'condition':'lj1_rpm(t/min)<'+str(speed),'value':i})
   paths['status'].append(
-    "Breaking down to speed {} with inertia simulation".format(
-    speed))
+    "Breaking down to {} rpm with {} N and {} Nm² inertia simulation".format(
+    speed,force,inertia))
   paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)',
                 'inertia':inertia, 'condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':force,
@@ -113,8 +113,8 @@ def make_slowp(pos,inertia,speed):
   i = len(paths['state'])
   paths['state'].append({'condition':'lj1_rpm(t/min)<'+str(speed),'value':i})
   paths['status'].append(
-    "Breaking down to speed {} with inertia simulation".format(
-    speed))
+    "Breaking down to {} rpm with {} µm and {} Nm² inertia simulation".format(
+    speed,pos,inertia))
   paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)',
                 'inertia':inertia, 'condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':0,
@@ -138,7 +138,8 @@ The pad normal force will be adjusted in real time with a PID.
 def make_cstf(force,delay):
   i = len(paths['state'])
   paths['state'].append({'condition':'delay='+str(delay),'value':i})
-  paths['status'].append("Breaking with constant force")
+  paths['status'].append("Breaking with constant force of %d N for %ds"%(
+    force,delay))
   paths['speed'].append({'type':'constant','condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':force,
                 'condition':'step>'+str(i)})
@@ -163,7 +164,8 @@ Make sure that the disc is rotating or the force will increase undefinitely!
 def make_cstc(torque,delay):
   i = len(paths['state'])
   paths['state'].append({'condition':'delay='+str(delay),'value':i})
-  paths['status'].append("Breaking with constant torque")
+  paths['status'].append("Breaking with constant torque of %d Nm for %d s"%(
+    torque,delay))
   paths['speed'].append({'type':'constant','condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':torque,
                 'condition':'step>'+str(i)})
@@ -186,7 +188,8 @@ The pad motor will stay at the given position and the speed will not vary.
 def make_cstp(pos,delay):
   i = len(paths['state'])
   paths['state'].append({'condition':'delay='+str(delay),'value':i})
-  paths['status'].append("Breaking with constant position")
+  paths['status'].append("Breaking with constant position of %d µm for %d s"%(
+    pos,delay))
   paths['speed'].append({'type':'constant','condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':0,
                 'condition':'step>'+str(i)})
@@ -209,7 +212,7 @@ The syntax is "mylabel[</>]value"
 def make_wait_cd(value,force=0,pos=0):
   i = len(paths['state'])
   paths['state'].append({'condition':value,'value':i})
-  paths['status'].append("Waiting...")
+  paths['status'].append("Waiting until "+value)
   paths['speed'].append({'type':'constant', 'condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':force,
                 'condition':'step>'+str(i)})
