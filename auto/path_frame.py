@@ -49,13 +49,12 @@ class PathFrame(tk.Frame):
         font=("Helvetica",20))
     self.title.grid(row=0,column=0,columnspan=10)
     self.out = root.output
-    self.funcs = avail
     self.textbox = tk.Text(self,width=50,height=10)
     self.textbox.grid(row=1,column=0)
     self.textbox.bind('<1>',lambda *a: self.out(HELP))
     self.path_list = tk.Listbox(self)
     self.path_list.grid(row=1,column=1)
-    self.path_list.insert(tk.END,*[f.__name__ for f in self.funcs])
+    self.path_list.insert(tk.END,*[f.__name__ for f in funcs])
     self.path_list.bind("<<ListboxSelect>>",self.update_help)
     self.path_list.bind("<Double-1>",self.append_path)
 
@@ -80,12 +79,12 @@ class PathFrame(tk.Frame):
     self.textbox.insert(tk.END,proto(self.funcs[i])+"\n")
 
   def get_path(self):
-    try:
-      a = flatten(eval("["+",".join(self.textbox.get(
+    #try:
+    a = flatten(eval("["+",".join(self.textbox.get(
         "1.0",tk.END).strip().split("\n")).replace(",,",",")+"]"))
-    except Exception as e:
-      print("Error during eval():",e)
-      a = None
+    #except Exception as e:
+    #  print("Error during eval():",e)
+    #  a = None
     return a
 
   def get_config(self):

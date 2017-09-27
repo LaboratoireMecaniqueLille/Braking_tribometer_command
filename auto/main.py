@@ -63,11 +63,15 @@ load_frame.grid(row=2,column=1)
 
 def go():
   d[:] = []
-  d.append(path_frame.get_path())
-  d.append(spectrum_frame.get_config())
-  d.append(lj_frame.get_config())
-  d.append(graph_frame.get_config())
-  d.append(save_dir_entry.get())
+  try:
+    d.append(path_frame.get_path())
+    d.append(spectrum_frame.get_config())
+    d.append(lj_frame.get_config())
+    d.append(graph_frame.get_config())
+    d.append(save_dir_entry.get())
+  except Exception,e:
+    output(e)
+    return
   root.destroy()
 
 tk.Button(root,text="GO!",command=go).grid(row=3,column=2)
