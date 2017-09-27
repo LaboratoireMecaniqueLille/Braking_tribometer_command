@@ -9,9 +9,9 @@ source = open(FILE,"r").read()
 
 #print(source)
 
-# Remove the comments (makes the code lighter)
+# Remove the comments (makes the code lighter)
 source = re.sub("\s*--.+","",source)
-# Remove the spacing lines
+# Remove the spacing lines
 source = re.sub("\n+","\n",source,flags=re.MULTILINE)
 
 print(source)

@@ -37,7 +37,7 @@ class Graph(object):
 
 
 #lj1 = crappy.inout.Labjack_t7(identifier="470012972",
-    #out_channels="TDAC0",out_gain=1/400) # T7
+    #out_channels="TDAC0",out_gain=1/400) # T7
 lj1 = crappy.inout.Labjack_t7(identifier="470012972",channels=[
   {'name':'TDAC0','gain':1/412},
   {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
@@ -71,7 +71,7 @@ def update_servo_mode():
   update_servo()
 
 def update_servo(event=None):
-  if servo_mode.get() == 1: # Force mode
+  if servo_mode.get() == 1: # Force mode
     set_pid(float(servo_field.get()))
   else:
     servostar.set_position(int(float(servo_field.get())))

@@ -21,7 +21,7 @@ class Graph(object):
 
     for i in range(left):
       self.lline.append(self.axl.plot([],[])[0])
-      # To avoid restarting the color cycle on the second y axis:
+      # To avoid restarting the color cycle on the second y axis:
       next(self.axr._get_lines.color_cycle)
     for i in range(right):
       self.rline.append(self.axr.plot([],[])[0])
@@ -57,14 +57,14 @@ class Graph(object):
 
 tempo_hydrau = .2
 #lj1 = crappy.inout.Labjack_t7(identifier="470012972",
-    #out_channels="TDAC0",out_gain=1/400) # T7
+    #out_channels="TDAC0",out_gain=1/400) # T7
 lj1 = crappy.inout.Labjack_t7(identifier="470012972",channels=[
   {'name':'TDAC0','gain':1/412},
   {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
   {'name':'AIN1','gain':413,'make_zero':False}, # rpm
   {'name':'AIN2','gain':-50,'make_zero':True}, # torque
-  {'name':'FIO2','direction':True}, # Hydrau
-  {'name':'FIO3','direction':True}, # ..
+  {'name':'FIO2','direction':True}, # Hydrau
+  {'name':'FIO3','direction':True}, # ..
   ])
 lj1.open()
 
@@ -72,14 +72,14 @@ go = True
 
 def enable_pid():
   #if not lj1.read(6000):
-  #  lj1.write(1,6000) # LUA_RUN
+  #  lj1.write(1,6000) # LUA_RUN
   lj1.write(1,46002)
 
 def disable_pid():
   set_pid(0)
   lj1.write(0,46002)
   #if lj1.read(6000):
-  #  lj1.write(0,6000) # LUA_RUN
+  #  lj1.write(0,6000) # LUA_RUN
 
 def set_pid(val):
   lj1.write(val,46000)
@@ -99,7 +99,7 @@ def update_servo_mode():
   update_servo()
 
 def update_servo(event=None):
-  if servo_mode.get() == 1: # Force mode
+  if servo_mode.get() == 1: # Force mode
     set_pid(float(servo_field.get()))
   else:
     servostar.set_position(int(float(servo_field.get())))
@@ -133,7 +133,7 @@ def hydrau_out():
   hydrau_label.configure(text="Hydrau out")
 
 def hydrau_in():
-  lj1["FIO2"] = 1 # Just to be sure...
+  lj1["FIO2"] = 1 # Just to be sure...
   lj1["FIO3"] = 1
   sleep(tempo_hydrau)
   lj1["FIO2"] = 0

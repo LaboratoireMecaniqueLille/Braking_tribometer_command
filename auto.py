@@ -26,7 +26,7 @@ def cst_c(torque,delay):
 
 def cst_p(pos,delay):
   return {'type':'cst_P','pos':pos,'delay':delay}
-# ==================
+# ==================
 
 
 # ======== Definition of the path by the user
@@ -49,7 +49,7 @@ for d,n in zip(path[:-1],path[1:]):
     elif "pos" in n:
       d['pos'] = n['pos']
     elif 'torque' in n:
-      d['force'] = 20*n['torque'] # Rule of thumbs to preload the spring
+      d['force'] = 20*n['torque'] # Rule of thumbs to preload the spring
 
 # ===== Block that will simply print the status at each step in the terminal
 
@@ -61,18 +61,18 @@ class Status_printer(blocks.MasterBlock):
   def loop(self):
     print(self.d[self.inputs[0].recv()['step']])
 
-state = [] # Path for the state generator (increment after each substep)
-speed_list = [] # Path for the motor
-force_list = [] # Path for the pad analog input
-force_mode_list = [] # Path for switching on and off the PID
-pad_pos_list = [] # To control the pad mode and set the position
-hydrau_list = [] # To drive the hydraulic actuator
+state = [] # Path for the state generator (increment after each substep)
+speed_list = [] # Path for the motor
+force_list = [] # Path for the pad analog input
+force_mode_list = [] # Path for switching on and off the PID
+pad_pos_list = [] # To control the pad mode and set the position
+hydrau_list = [] # To drive the hydraulic actuator
 
 
-status_printer = [] # List of each substep to print the current step
+status_printer = [] # List of each substep to print the current step
 
 
-# ====== The functions that will turn each path into the path for the actuators
+# ====== The functions that will turn each path into the path for the actuators
 def make_goto(speed,delay,force=0,pos=0):
   i = len(state)
   # Acceleration
@@ -280,9 +280,9 @@ hydrau_path_fio2 = [
 
 hydrau_path_fio3 = [
     {'type':'constant','value':0,'condition':'hydrau<1'}, # Ouvert
-    {'type':'constant','value':1,'condition':tempo2}, # fermer jusqu'à 2tempo
+    {'type':'constant','value':1,'condition':tempo2}, # fermer jusqu'à 2tempo
     {'type':'constant','value':0,'condition':'hydrau>0'}, # refermer
-    {'type':'constant','value':1,'condition':tempo}, # fermer jusqu'à tempo
+    {'type':'constant','value':1,'condition':tempo}, # fermer jusqu'à tempo
     ]
 
 gen_fio2 = blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='h2')
@@ -302,8 +302,8 @@ lj = blocks.IOBlock("Labjack_t7",identifier="470012972",channels=[
   {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
   {'name':'AIN1','gain':413,'make_zero':False}, # rpm
   {'name':'AIN2','gain':-50,'make_zero':True}, # torque
-  {'name':'FIO2','direction':True}, # Hydrau
-  {'name':'FIO3','direction':True}, # ..
+  {'name':'FIO2','direction':True}, # Hydrau
+  {'name':'FIO3','direction':True}, # ..
   {'name':46000,'direction':True},
   {'name':46002,'direction':True},
   ],labels=['t(s)','F(N)','rpm(t/min)','C(Nm)'],

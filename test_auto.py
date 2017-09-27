@@ -24,16 +24,16 @@ tempo2 = "delay="+str(2*t)
 
 hydrau_path_fio2 = [
     {'type':'constant','value':1,'condition':'hydrau<1'}, #Sorti, jusqu'à 0
-    {'type':'constant','value':1,'condition':tempo}, # Attendre avant de rentrer
+    {'type':'constant','value':1,'condition':tempo}, # Attendre avant de rentrer
     {'type':'constant','value':0,'condition':tempo}, # Rentrer, attendre la fin
     {'type':'constant','value':0,'condition':'hydrau>0'}, # Avant de recommencer
     ]
 
 hydrau_path_fio3 = [
     {'type':'constant','value':0,'condition':'hydrau<1'}, # Ouvert
-    {'type':'constant','value':1,'condition':tempo2}, # fermer jusqu'à 2tempo
+    {'type':'constant','value':1,'condition':tempo2}, # fermer jusqu'à 2tempo
     {'type':'constant','value':0,'condition':'hydrau>0'}, # refermer
-    {'type':'constant','value':1,'condition':tempo}, # fermer jusqu'à tempo
+    {'type':'constant','value':1,'condition':tempo}, # fermer jusqu'à tempo
     ]
 
 gen_fio2 = crappy.blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='h2')
@@ -47,7 +47,7 @@ for i,p in enumerate(path):
   state_path.extend(
     [ #Acceleration
       {'type':'constant','value':i,'condition':'rpm(t/m)>'+str(.99*p['speed'])},
-      # Stabilisation
+      # Stabilisation
       {'type':'constant','value':i,'condition':'delay=3'},
       # Breaking
       {'type':'constant','value':i,'condition':'delay='+str(p['duration'])},
@@ -87,8 +87,8 @@ lj1 = crappy.blocks.IOBlock("Labjack_t7",identifier="470012972",channels=[
   {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
   {'name':'AIN1','gain':413,'make_zero':True}, # rpm
   {'name':'AIN2','gain':-50,'make_zero':True}, # torque
-  {'name':'FIO2','direction':True}, # Hydrau
-  {'name':'FIO3','direction':True}, # ..
+  {'name':'FIO2','direction':True}, # Hydrau
+  {'name':'FIO3','direction':True}, # ..
   {'name':46000,'direction':True},
   {'name':46002,'direction':True},
   ],labels=['t(s)','F(N)','rpm(t/m)','C(Nm)'],cmd_labels=['speed_cmd','h2','h3','f_cmd','pid'])

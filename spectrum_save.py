@@ -17,7 +17,7 @@ VOIES:
 """
 
 channels = list(range(8))
-ranges = [10000]*len(channels) # -10/+10V (in mV)
+ranges = [10000]*len(channels) # -10/+10V (in mV)
 freq = 100000
 timestamp = time.strftime("%y-%m-%d_%Hh%M")
 
@@ -31,7 +31,7 @@ spectrum = crappy.blocks.IOBlock('spectrum',ranges=ranges,
 
 gains = [1,500,500,500,2060,50,1,413]
 gains = [g*(r/32000000) for g,r in zip(gains,ranges)]
-# Full range: DL=32000 (et /1000 pour passer de mV à V)
+# Full range: DL=32000 (et /1000 pour passer de mV à V)
 
 #graph = crappy.blocks.Grapher(*[('t(s)',i) for i in chan_names])
 hsaver = crappy.blocks.Hdf_saver(timestamp+"/spectrum.h5",

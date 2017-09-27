@@ -11,7 +11,7 @@ comedi = crappy.blocks.IOBlock('comedi',
 
 graph = crappy.blocks.Grapher(*[('t(s)','T'+str(i)) for i in range(1,7)+range(8,11)])
 
-coord = [ # Coordinates for the thermocouples
+coord = [ # Coordinates for the thermocouples
 (185, 430),  # T1
 (145, 320),  # T2
 (105, 220),  # T3
@@ -25,7 +25,7 @@ coord = [ # Coordinates for the thermocouples
 
 coord_disc = [
 (100,800), #Tdisc1
-(100,920) # Tdisc2
+(100,920) # Tdisc2
 ]
 
 options = [{'type':'dot_text',
