@@ -1,9 +1,11 @@
 #coding: utf-8
 from __future__ import print_function
 
-__all__ = ["goto","wait","slow","slow_p","cst_f","cst_p","cst_c","wait_cd","funcs"]
+__all__ = ["goto","wait","slow","slow_p","cst_f",\
+    "cst_p","cst_c","wait_cd","funcs"]
 
 # ========= Definition of the simples functions to expose to the user
+# and the functions that will turn each path into the path for the actuators
 def goto(speed,delay=5):
   """
 Will accelerate to the given speed in rpm.
@@ -83,7 +85,7 @@ def make_slow(force,inertia,speed):
   i = len(paths['state'])
   paths['state'].append({'condition':'lj1_rpm(t/min)<'+str(speed),'value':i})
   paths['status'].append(
-    "Breaking down to {} rpm with {} N and {} Nm² inertia simulation".format(
+    "Breaking down to {} rpm with {} N and {} Nm² inertia simulation".format(
     speed,force,inertia))
   paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)',
                 'inertia':inertia, 'condition':'step>'+str(i)})
@@ -113,7 +115,7 @@ def make_slowp(pos,inertia,speed):
   i = len(paths['state'])
   paths['state'].append({'condition':'lj1_rpm(t/min)<'+str(speed),'value':i})
   paths['status'].append(
-    "Breaking down to {} rpm with {} µm and {} Nm² inertia simulation".format(
+    "Breaking down to {} rpm with {} µm and {} Nm² inertia simulation".format(
     speed,pos,inertia))
   paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)',
                 'inertia':inertia, 'condition':'step>'+str(i)})
@@ -237,10 +239,9 @@ def make_end():
   paths['pad'].append({'type':'constant','value':0,'condition':delay})
   paths['hydrau'].append({'type':'constant','value':1,'condition':delay})
 
-# ==================
+# ==================
 
 funcs = [goto,wait,slow,slow_p,cst_f,cst_c,cst_p,wait_cd]
-# ==== The functions that will turn each path into the path for the actuators
 
 avail = {'goto':make_goto,
          'wait':make_wait,
@@ -258,11 +259,10 @@ last_step = {"speed":0}
 def prepare_path(path):
   for s in ['state','speed','force','fmode','pad','hydrau','status']:
     paths[s] = []
-  # === Preparing path ====
-  # Adding a proper ending
+  # Adding a proper ending
   path.append({'type':'end'})
 
-  # Anticipating, to preload the spring before releasing the spring
+  # Anticipating, to preload the spring before releasing the actuator
   for d,n in zip(path[:-1],path[1:]):
     if d['type'] in ['goto','wait']:
       if "force" in n:
@@ -270,7 +270,7 @@ def prepare_path(path):
       elif "pos" in n:
         d['pos'] = n['pos']
       elif 'torque' in n:
-        d['force'] = 20*n['torque'] # Rule of thumbs to preload the spring
+        d['force'] = 20*n['torque'] # Rule of thumbs to preload the spring
 
   # === Calling these functions according to the user input ====
   for step in path:
@@ -281,11 +281,11 @@ def prepare_path(path):
       print("Unknown path:",t)
     last_step.update(step)
 
-  # The state generator only uses constants
+  # The state generator only uses constants
   for d in paths['state']:
     d['type'] = 'constant'
 
-  # ==== Facultative: display path for debug =====
+  # ==== Facultative: display path for debug =====
   #"""
   def display_state():
     for d,s in zip(paths['state'],paths['status']):

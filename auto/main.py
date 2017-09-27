@@ -1,8 +1,8 @@
 #coding: utf-8
 
 # ========================================
-# = The main interface for the auto mode =
-# ========================================
+# = The main interface for the auto mode =
+# ========================================
 
 from __future__ import print_function
 

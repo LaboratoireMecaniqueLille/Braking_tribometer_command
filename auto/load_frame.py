@@ -46,7 +46,7 @@ class LoadFrame(tk.Frame):
           if f.name in config:
             r = f.set_config(config[f.name])
             if r:
-              self.out(r) # To print an error if any
+              self.out(r) # To print an error if any
               return
           else:
             not_ok.append(f.name)

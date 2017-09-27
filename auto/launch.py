@@ -58,7 +58,7 @@ def launch(path,spectrum,lj2,graph,savepath):
     savepath += "/"
   savepath += ctime()[:-5].replace(" ","_")+"/"
 
-  # This is used to know if step_gen has additional inputs
+  # This is used to know if step_gen has additional inputs
   l_in = [d['value'] for d in path if d['type'] == 'wait_cd']
   l_in = [v.split('<')[0] if '<' in v else v.split('>')[0] for v in l_in]
 
@@ -87,7 +87,7 @@ def launch(path,spectrum,lj2,graph,savepath):
   tempo = "delay="+str(t)
   tempo2 = "delay="+str(2*t)
   hydrau_path_fio2 = [
-      {'type':'constant','value':0,'condition':'hydrau>0'}, # Consider it out
+      {'type':'constant','value':0,'condition':'hydrau>0'}, # Consider it out
       {'type':'constant','value':1,'condition':'hydrau<1'}, # Asking to retract
       {'type':'constant','value':1,'condition':tempo}, # Wait...
       {'type':'constant','value':0,'condition':tempo}, # Retract and wait
@@ -97,7 +97,7 @@ def launch(path,spectrum,lj2,graph,savepath):
       {'type':'constant','value':0,'condition':'hydrau>0'}, # We asked it out
       {'type':'constant','value':1,'condition':tempo}, # Load...
       {'type':'constant','value':0,'condition':'hydrau<1'}, # Now go
-      {'type':'constant','value':1,'condition':tempo2}, # Load again, to go in
+      {'type':'constant','value':1,'condition':tempo2}, # Load again, to go in
       ]
 
   gen_fio2 = blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='lj1_h2')
@@ -138,7 +138,7 @@ def launch(path,spectrum,lj2,graph,savepath):
   link(labjack1,speed_gen)
   link(labjack1,step_gen)
 
-  # == And the associated saver
+  # == And the associated saver
   lj1_saver = blocks.Saver(savepath+"lj1.csv")
   link(labjack1,lj1_saver)
 
@@ -153,7 +153,7 @@ def launch(path,spectrum,lj2,graph,savepath):
   for c in spectrum:
     spec_chan.append(c['chan'])
     spec_labels.append(c['lbl'])
-    c['range'] = int(1000*c['range']) # V to mV
+    c['range'] = int(1000*c['range']) # V to mV
     spec_ranges.append(c['range']\
         if c['range'] in [50,250,500,1000,2000,5000,10000] else 10000)
     spec_gains[c['chan']] = c['gain']
@@ -194,7 +194,7 @@ def launch(path,spectrum,lj2,graph,savepath):
     lj2_saver = blocks.Saver(savepath+"lj2.csv")
     link(labjack2,lj2_saver)
 
-  # Linking additional inputs to step_gen
+  # Linking additional inputs to step_gen
   if any([lbl in l_in for lbl in lj2_labels]):
     link(labjack2,step_gen)
   if any([lbl in l_in for lbl in [c['lbl'] for c in spectrum]]):
@@ -206,7 +206,7 @@ def launch(path,spectrum,lj2,graph,savepath):
   for g in graph.values():
     #print("Graph:",g)
     graphs.append(blocks.Grapher(*[('t(s)',lbl) for lbl in g],backend='qt4agg'))
-    # Link to the concerned blocks
+    # Link to the concerned blocks
     if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):
       link(spectrum_block,graphs[-1],
         condition=HFSplit(spec_labels,spec_chan,spec_gains,spec_ranges))
@@ -214,5 +214,12 @@ def launch(path,spectrum,lj2,graph,savepath):
       link(labjack2,graphs[-1])
     if any([lbl in in_chan.keys() for lbl in g]):
       link(labjack1,graphs[-1])
+
+  drawing  = True
+  if drawing:
+    from pad_config import get_drawing
+    draw_block = get_drawing()
+    link(labjack2,draw_block)
+
 
   start()
