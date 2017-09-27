@@ -1,5 +1,7 @@
 #coding: utf-8
-__all__ = ["goto","wait","slow","slow_p","cst_f","cst_p","cst_c","funcs"]
+from __future__ import print_function
+
+__all__ = ["goto","wait","slow","slow_p","cst_f","cst_p","cst_c","wait_cd","funcs"]
 
 # ========= Definition of the simples functions to expose to the user
 def goto(speed,delay=5):
@@ -17,9 +19,11 @@ def make_goto(speed,delay,force=0,pos=0):
   i = len(paths['state'])
   # Acceleration
   if last_step["speed"] < speed:
-    paths['state'].append({'condition':'lj1_rpm(t/min)>'+str(.99*speed),'value':i})
+    paths['state'].append(
+        {'condition':'lj1_rpm(t/min)>'+str(.99*speed),'value':i})
   else:
-    paths['state'].append({'condition':'lj1_rpm(t/min)<'+str(1.01*speed),'value':i})
+    paths['state'].append(
+        {'condition':'lj1_rpm(t/min)<'+str(1.01*speed),'value':i})
   paths['status'].append("Accelerating")
   i += 1
   # Stabilisation
@@ -38,7 +42,8 @@ def make_goto(speed,delay,force=0,pos=0):
   else:
     paths['pad'].append(
         {'type':'constant','value':pos,'condition':'step>'+str(i)})
-  paths['hydrau'].append({'type':'constant','value':1,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':1,'condition':'step>'+str(i)})
 
 def wait(delay):
   """
@@ -61,7 +66,8 @@ def make_wait(delay,force=0,pos=0):
   else:
     paths['pad'].append(
         {'type':'constant','value':pos,'condition':'step>'+str(i)})
-  paths['hydrau'].append({'type':'constant','value':1,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':1,'condition':'step>'+str(i)})
 
 def slow(force,inertia=5,speed=0): #inertia in kgm², speed in rpm
   """
@@ -79,15 +85,16 @@ def make_slow(force,inertia,speed):
   paths['status'].append(
     "Breaking down to speed {} with inertia simulation".format(
     speed))
-  paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)','inertia':inertia,
-                'condition':'step>'+str(i)})
+  paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)',
+                'inertia':inertia, 'condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':force,
                 'condition':'step>'+str(i)})
   paths['fmode'].append(
       {'type':'constant','value':1,'condition':'step>'+str(i)})
   paths['pad'].append(
       {'type':'constant','value':False,'condition':'step>'+str(i)})
-  paths['hydrau'].append({'type':'constant','value':0,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':0,'condition':'step>'+str(i)})
 
 def slow_p(pos,inertia=5,speed=0):
   """
@@ -108,15 +115,16 @@ def make_slowp(pos,inertia,speed):
   paths['status'].append(
     "Breaking down to speed {} with inertia simulation".format(
     speed))
-  paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)','inertia':inertia,
-                'condition':'step>'+str(i)})
+  paths['speed'].append({'type':'inertia','flabel':'lj1_C(Nm)',
+                'inertia':inertia, 'condition':'step>'+str(i)})
   paths['force'].append({'type':'constant','value':0,
                 'condition':'step>'+str(i)})
   paths['fmode'].append(
       {'type':'constant','value':1,'condition':'step>'+str(i)})
   paths['pad'].append(
       {'type':'constant','value':pos,'condition':'step>'+str(i)})
-  paths['hydrau'].append({'type':'constant','value':0,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':0,'condition':'step>'+str(i)})
 
 def cst_f(force,delay):
   """
@@ -138,7 +146,8 @@ def make_cstf(force,delay):
       {'type':'constant','value':1,'condition':'step>'+str(i)})
   paths['pad'].append(
       {'type':'constant','value':False,'condition':'step>'+str(i)})
-  paths['hydrau'].append({'type':'constant','value':0,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':0,'condition':'step>'+str(i)})
 
 def cst_c(torque,delay):
   """
@@ -162,7 +171,8 @@ def make_cstc(torque,delay):
       {'type':'constant','value':2,'condition':'step>'+str(i)})
   paths['pad'].append(
       {'type':'constant','value':False,'condition':'step>'+str(i)})
-  paths['hydrau'].append({'type':'constant','value':0,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':0,'condition':'step>'+str(i)})
 
 def cst_p(pos,delay):
   """
@@ -184,7 +194,35 @@ def make_cstp(pos,delay):
       {'type':'constant','value':0,'condition':'step>'+str(i)})
   paths['pad'].append(
       {'type':'constant','value':pos,'condition':'step>'+str(i)})
-  paths['hydrau'].append({'type':'constant','value':0,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':0,'condition':'step>'+str(i)})
+
+def wait_cd(s):
+  """
+To wait for a sensor do go past/below a given value
+
+It takes a single string as an argument.
+The syntax is "mylabel[</>]value"
+"""
+  return {'type':'wait_cd','value':s}
+
+def make_wait_cd(value,force=0,pos=0):
+  i = len(paths['state'])
+  paths['state'].append({'condition':value,'value':i})
+  paths['status'].append("Waiting...")
+  paths['speed'].append({'type':'constant', 'condition':'step>'+str(i)})
+  paths['force'].append({'type':'constant','value':force,
+                'condition':'step>'+str(i)})
+  paths['fmode'].append({'type':'constant','value':int(bool(force)),
+                      'condition':'step>'+str(i)})
+  if force != 0:
+    paths['pad'].append({'type':'constant','value':False,
+                    'condition':'step>'+str(i)})
+  else:
+    paths['pad'].append(
+        {'type':'constant','value':pos,'condition':'step>'+str(i)})
+  paths['hydrau'].append(
+      {'type':'constant','value':1,'condition':'step>'+str(i)})
 
 def make_end():
   delay = 'delay=1'
@@ -198,7 +236,7 @@ def make_end():
 
 # ==================
 
-funcs = [goto,wait,slow,slow_p,cst_f,cst_c,cst_p]
+funcs = [goto,wait,slow,slow_p,cst_f,cst_c,cst_p,wait_cd]
 # ==== The functions that will turn each path into the path for the actuators
 
 avail = {'goto':make_goto,
@@ -208,6 +246,7 @@ avail = {'goto':make_goto,
          'cst_F':make_cstf,
          'cst_C':make_cstc,
          'cst_P':make_cstp,
+         'wait_cd':make_wait_cd,
          'end':make_end}
 
 paths = {}

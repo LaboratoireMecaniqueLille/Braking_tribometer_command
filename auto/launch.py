@@ -58,6 +58,10 @@ def launch(path,spectrum,lj2,graph,savepath):
     savepath += "/"
   savepath += ctime()[:-5].replace(" ","_")+"/"
 
+  # This is used to know if step_gen has additional inputs
+  l_in = [d['value'] for d in path if d['type'] == 'wait_cd']
+  l_in = [v.split('<')[0] if '<' in v else v.split('>')[0] for v in l_in]
+
   from funcs import prepare_path
   paths = prepare_path(path)
 
@@ -181,8 +185,8 @@ def launch(path,spectrum,lj2,graph,savepath):
     for c in lj2:
       lj2_labels.append(c['lbl'])
       del c['lbl']
-    print("lj2Lablels=",lj2_labels)
-    print("lj2 chan=",lj2)
+    #print("lj2Lablels=",lj2_labels)
+    #print("lj2 chan=",lj2)
     labjack2 = blocks.IOBlock("Labjack_t7",identifier="470014418",
         channels=lj2,labels=lj2_labels,freq=freq_lj2,verbose=True)
 
@@ -190,10 +194,17 @@ def launch(path,spectrum,lj2,graph,savepath):
     lj2_saver = blocks.Saver(savepath+"lj2.csv")
     link(labjack2,lj2_saver)
 
+  # Linking additional inputs to step_gen
+  if any([lbl in l_in for lbl in lj2_labels]):
+    link(labjack2,step_gen)
+  if any([lbl in l_in for lbl in [c['lbl'] for c in spectrum]]):
+    link(spectrum_block,step_gen,
+        condition=HFSplit(spec_labels,spec_chan,spec_gains,spec_ranges))
+
   # Creating the graphs
   graphs = []
   for g in graph.values():
-    print("Graph:",g)
+    #print("Graph:",g)
     graphs.append(blocks.Grapher(*[('t(s)',lbl) for lbl in g],backend='qt4agg'))
     # Link to the concerned blocks
     if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):

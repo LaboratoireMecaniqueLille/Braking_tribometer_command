@@ -65,8 +65,8 @@ class PathFrame(tk.Frame):
     Gets the selected function and prints associated help in help_txt.
     """
     i = self.path_list.curselection()[0]
-    s = proto(self.funcs[i])
-    s += "\n"+self.funcs[i].__doc__.strip()
+    s = proto(funcs[i])
+    s += "\n"+funcs[i].__doc__.strip()
     self.out(s)
 
   def append_path(self,event=None):
@@ -76,7 +76,7 @@ class PathFrame(tk.Frame):
     Will insert the selected path at the end of the textbox.
     """
     i = self.path_list.curselection()[0]
-    self.textbox.insert(tk.END,proto(self.funcs[i])+"\n")
+    self.textbox.insert(tk.END,proto(funcs[i])+"\n")
 
   def get_path(self):
     #try:
