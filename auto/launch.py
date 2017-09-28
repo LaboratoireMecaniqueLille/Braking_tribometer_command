@@ -20,15 +20,21 @@ class Popup(blocks.MasterBlock):
 
   def prepare(self):
     self.root = tk.Tk()
+    self.root.resizable(height=False,width=False)
+    self.root.geometry('{}x{}'.format(420, 100))
     tk.Button(self.root,text="Stop",command=self.term).pack()
-    self.label = tk.Label(self.root,text="Initializing...")
+    self.label = tk.Label(self.root,text="Initializing...",wraplength=400)
     self.label.pack()
+    self.label_next = tk.Label(self.root,text="Initializing...",wraplength=400)
+    self.label_next.pack()
 
   def loop(self):
     if self.inputs[0].poll():
       i = self.inputs[0].recv()['step']
       print(self.d[i])
       self.label.configure(text=self.d[i]+" (%d/%d)"%(i+1,len(self.d)))
+      self.label_next.configure(
+          text="next step: "+self.d[min(i+1,len(self.d)-1)])
     self.root.update()
 
   def term(self):
