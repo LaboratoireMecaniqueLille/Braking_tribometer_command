@@ -52,7 +52,7 @@ class Bypass():
       return d
     return self.v
 
-def launch(path,spectrum,lj2,graph,savepath):
+def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
   print("Let's go!",path,spectrum,lj2,graph)
   if savepath[-1] != "/":
     savepath += "/"
@@ -185,8 +185,6 @@ def launch(path,spectrum,lj2,graph,savepath):
     for c in lj2:
       lj2_labels.append(c['lbl'])
       del c['lbl']
-    #print("lj2Lablels=",lj2_labels)
-    #print("lj2 chan=",lj2)
     labjack2 = blocks.IOBlock("Labjack_t7",identifier="470014418",
         channels=lj2,labels=lj2_labels,freq=freq_lj2,verbose=True)
 
@@ -215,11 +213,9 @@ def launch(path,spectrum,lj2,graph,savepath):
     if any([lbl in in_chan.keys() for lbl in g]):
       link(labjack1,graphs[-1])
 
-  drawing  = True
-  if drawing:
+  if enable_drawing:
     from pad_config import get_drawing
-    draw_block = get_drawing()
+    draw_block = get_drawing(lj2_labels)
     link(labjack2,draw_block)
-
 
   start()

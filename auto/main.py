@@ -69,6 +69,7 @@ def go():
     d.append(lj_frame.get_config())
     d.append(graph_frame.get_config())
     d.append(save_dir_entry.get())
+    d.append(enable_drawing.get())
   except Exception,e:
     output(e)
     return
@@ -91,6 +92,9 @@ save_dir_entry.grid(row=3,column=0)
 save_dir_button = tk.Button(root,text="...",command=choose_dir)
 save_dir_button.grid(row=3,column=1)
 
+enable_drawing = tk.IntVar()
+tk.Checkbutton(root,text="Enable the pad drawing",
+    variable=enable_drawing).grid(row=4,column=1)
 
 root.mainloop()
 
