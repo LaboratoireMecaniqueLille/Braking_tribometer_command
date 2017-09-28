@@ -58,6 +58,23 @@ class Bypass():
       return d
     return self.v
 
+class Bypass_trig():
+  """
+  This condition is used to bypass the generator in case of cancelation
+  """
+  def __init__(self,pipe,value):
+    self.p = pipe
+    self.v = value
+    self.last = None
+
+  def evaluate(self,d):
+    if not self.p.poll():
+      if d['step'] != self.last:
+        self.last = d['step']
+        return d
+    else:
+      return self.v
+
 def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
   print("Let's go!",path,spectrum,lj2,graph)
   if savepath[-1] != "/":
@@ -78,16 +95,16 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
 
 
   speed_gen = blocks.Generator(paths['speed'],cmd_label="lj1_speed_cmd",freq=300)
-  link(step_gen,speed_gen,condition=condition.Trig_on_change('step'))
+  link(step_gen,speed_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
   force_gen = blocks.Generator(paths['force'],cmd_label="lj1_fcmd")
-  link(step_gen,force_gen,condition=condition.Trig_on_change('step'))
+  link(step_gen,force_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
   fmode_gen = blocks.Generator(paths['fmode'],cmd_label="lj1_fmode")
-  link(step_gen,fmode_gen,condition=condition.Trig_on_change('step'))
+  link(step_gen,fmode_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
   padpos_gen = blocks.Generator(paths['pad'],cmd_label="pad")
-  link(step_gen,padpos_gen,condition=condition.Trig_on_change('step'))
+  link(step_gen,padpos_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
   t = .2
   tempo = "delay="+str(t)
