@@ -14,15 +14,19 @@ from spectrum_frame import SpectrumFrame
 from lj_frame import LJFrame
 from graph_frame import GraphFrame
 from load_frame import LoadFrame
+
 from launch import launch
 from lj1_chan import in_chan
 
+
 root = tk.Tk()
 
+# This widget is used to display help messages and errors
 help_txt = tk.Text(width=80,height=15)
 help_txt.grid(row=2,column=0)
 d = []
 
+# This function is used to print a message in the help widget
 def output(s):
   """
   To write s in the help_txt box.
@@ -32,8 +36,10 @@ def output(s):
   help_txt.insert("1.0",s)
   help_txt.configure(state=tk.DISABLED)
 
+# Hack to send the output function to all widgets
 root.output = output
 
+# == Creating the main frames ==
 path_frame = PathFrame(root)
 path_frame.grid(row=0,column=0)
 
@@ -43,7 +49,14 @@ lj_frame.grid(row=1,column=0)
 spectrum_frame = SpectrumFrame(root)
 spectrum_frame.grid(row=0,column=1)
 
+# The graph frame needs a way to know the name of the available labels
 def get_labels():
+  """
+  Returns a list of the labels that one can plot
+
+  It is a list of str, regrouping the labels of the spectrum channels,
+  the Labjack2 channels (added via the GUI) and the control Labjack.
+  """
   l = [d['lbl'] for d in lj_frame.chan_list]\
       + [d['lbl'] for d in spectrum_frame.chan_list]\
       + in_chan.keys()
@@ -61,6 +74,7 @@ frames = [path_frame,lj_frame,spectrum_frame,graph_frame]
 load_frame = LoadFrame(root, frames)
 load_frame.grid(row=2,column=1)
 
+# == Creating the GO button and its callback ==
 def go():
   d[:] = []
   try:
@@ -77,7 +91,7 @@ def go():
 
 tk.Button(root,text="GO!",command=go).grid(row=3,column=2)
 
-# Save dir
+# == Creating the field to choose the save directory and its callback ==
 def choose_dir():
   from tkFileDialog import askdirectory
   r = askdirectory()
@@ -92,12 +106,18 @@ save_dir_entry.grid(row=3,column=0)
 save_dir_button = tk.Button(root,text="...",command=choose_dir)
 save_dir_button.grid(row=3,column=1)
 
+# == Should we add the drawing block ? ==
 enable_drawing = tk.IntVar()
 tk.Checkbutton(root,text="Enable the pad drawing",
     variable=enable_drawing).grid(row=4,column=1)
 
+# == And go! ==
 root.mainloop()
 
+# == The user has now closed the window, my work as a GUI is over ==
+# If d is not empty (ie the user clicked GO), we copy it (just in case)
+# and launch the test itself.
+# To know what happens now, go to launch.py
 if d:
   e = list(d)
   launch(*e)

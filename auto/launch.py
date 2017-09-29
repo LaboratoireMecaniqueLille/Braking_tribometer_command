@@ -2,11 +2,12 @@
 from __future__ import division, print_function
 
 from multiprocessing import Pipe
+from time import ctime,sleep
+import Tkinter as tk
 
 from crappy import blocks,start,condition,link,stop
-from time import ctime,sleep
 
-import Tkinter as tk
+from funcs import prepare_path
 
 class Popup(blocks.MasterBlock):
   """
@@ -75,37 +76,51 @@ class Bypass_trig():
     else:
       return self.v
 
+# ==        This function is the core of the program:        ==
+# == It interprets the settings to actually perform the test ==
 def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
-  print("Let's go!",path,spectrum,lj2,graph)
+  #print("Let's go!",path,spectrum,lj2,graph)
   if savepath[-1] != "/":
     savepath += "/"
   savepath += ctime()[:-5].replace(" ","_")+"/"
 
-  # This is used to know if step_gen has additional inputs
+  # To know if step_gen has additional inputs
   l_in = [d['value'] for d in path if d['type'] == 'wait_cd']
   l_in = [v.split('<')[0] if '<' in v else v.split('>')[0] for v in l_in]
 
-  from funcs import prepare_path
   paths = prepare_path(path)
 
-  bp_p1,bp_p2 = Pipe()
-  step_gen = blocks.Generator(paths['state'],cmd_label="step",spam=True,freq=20)
+  bp_p1,bp_p2 = Pipe() # To update the Bypass conditions
+  # == The master generator: it orchestrates the whole test ==
+  step_gen = blocks.Generator(paths['state'],cmd_label="step",
+      spam=True,freq=20)
+
+  # == The little windows to abort the test and print its status ==
   popup = Popup(paths['status'],bp_p1)
   link(step_gen,popup,condition=condition.Trig_on_change("step"))
 
+  # == Motor speed ==
+  speed_gen = blocks.Generator(paths['speed'],
+      cmd_label="lj1_speed_cmd",freq=300)
+  link(step_gen,speed_gen,
+      condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
-  speed_gen = blocks.Generator(paths['speed'],cmd_label="lj1_speed_cmd",freq=300)
-  link(step_gen,speed_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
-
+  # == Pad force (when fmode=1), target torque (when fmode=2) ==
   force_gen = blocks.Generator(paths['force'],cmd_label="lj1_fcmd")
-  link(step_gen,force_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
+  link(step_gen,force_gen,
+      condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
+  # == How do we control the pad (0:Pos, 1:Force, 2:Torque)
   fmode_gen = blocks.Generator(paths['fmode'],cmd_label="lj1_fmode")
-  link(step_gen,fmode_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
+  link(step_gen,fmode_gen,
+      condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
+  # == Pad pos (and enable/disable analog control) ==
   padpos_gen = blocks.Generator(paths['pad'],cmd_label="pad")
-  link(step_gen,padpos_gen,condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
+  link(step_gen,padpos_gen,
+      condition=Bypass_trig(bp_p2,{'step':len(paths['state'])-1}))
 
+  # == These generators command each valve of the hydraulic actuator ==
   t = .2
   tempo = "delay="+str(t)
   tempo2 = "delay="+str(2*t)
@@ -123,22 +138,25 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
       {'type':'constant','value':1,'condition':tempo2}, # Load again, to go in
       ]
 
+  # They simply take 1 to push the actuator out and 0 to retract it
   gen_fio2 = blocks.Generator(hydrau_path_fio2,repeat=True,cmd_label='lj1_h2')
   gen_fio3 = blocks.Generator(hydrau_path_fio3,repeat=True,cmd_label='lj1_h3')
-
+  # Now we just need a "parent" generator that simply sends 0 and 1
   gen_hydrau = blocks.Generator(paths['hydrau'],cmd_label="hydrau",cmd=1)
   link(gen_hydrau,gen_fio2,condition=Bypass(bp_p2,{'hydrau':1}))
   link(gen_hydrau,gen_fio3,condition=Bypass(bp_p2,{'hydrau':1}))
-  link(step_gen,gen_hydrau,condition=Bypass(bp_p2,{'step':len(paths['state'])-1}))
+  link(step_gen,gen_hydrau,
+      condition=Bypass(bp_p2,{'step':len(paths['state'])-1}))
 
+  # == To drive the pad position and en/disable the analog input ==
   gen_pad = blocks.Generator(paths['pad'],cmd_label="pad")
   link(step_gen,gen_pad,condition=Bypass(bp_p2,{'step':len(paths['state'])-1}))
 
-  servostar = blocks.Machine([{"type":"Servostar","cmd":"pad","mode":"position",
-                              "device":"/dev/ttyS4"}])
+  servostar = blocks.Machine([{"type":"Servostar","cmd":"pad",
+    "mode":"position", "device":"/dev/ttyS4"}])
   link(padpos_gen,servostar)
 
-  # Creating the first Labjack, config is read from lj1_chan.py
+  # == Creating the first Labjack, config is read from lj1_chan.py ==
   from lj1_chan import in_chan,out_chan,identifier
   lj1_chan = []
   lj1_labels = ['t(s)']
@@ -161,12 +179,12 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
   link(labjack1,speed_gen)
   link(labjack1,step_gen)
 
-  # == And the associated saver
+  # And the saver
   lj1_saver = blocks.Saver(savepath+"lj1.csv")
   link(labjack1,lj1_saver)
 
 
-  # Creating the Spectrum block
+  # == Creating the Spectrum block ==
   spec_chan = []
   spec_labels = []
   spec_ranges = []
@@ -180,8 +198,9 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
     spec_ranges.append(c['range']\
         if c['range'] in [50,250,500,1000,2000,5000,10000] else 10000)
     spec_gains[c['chan']] = c['gain']
-  if spectrum:
+  if spectrum: # If the spectrum is not used, don't create the blocks
     from spectrum_tools import HFSplit,check_chan
+    # check_chan will make sure that the user opens the correct chans (see doc)
     spec_chan,spec_labels,spec_ranges,spec_gains = \
         check_chan(spec_chan,spec_labels,spec_ranges,spec_gains)
 
@@ -189,7 +208,7 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
         ranges=spec_ranges,
         samplerate=int(1000*spectrum_freq),
         streamer=True)
-
+    # And the saver
     spectrum_save = blocks.Hdf_saver(savepath+"spectrum.h5",
         metadata={'channels':spec_chan,
                   'names':spec_labels,
@@ -199,11 +218,9 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
           })
     link(spectrum_block,spectrum_save)
 
-  # Creating the second Labjack
-  freq_lj2 = lj2[0]
-  lj2 = lj2[1]
+  # == Creating the second Labjack ==
+  freq_lj2,lj2 = lj2
   if lj2:
-    print("LJ2=",lj2)
     lj2_labels = ['t(s)']
     for c in lj2:
       lj2_labels.append(c['lbl'])
@@ -211,24 +228,24 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
     labjack2 = blocks.IOBlock("Labjack_t7",identifier="470014418",
         channels=lj2,labels=lj2_labels,freq=freq_lj2,verbose=True)
 
-    # == And the saver
+    # And the saver
     lj2_saver = blocks.Saver(savepath+"lj2.csv")
     link(labjack2,lj2_saver)
 
-  # Linking additional inputs to step_gen
+  # == Linking additional inputs to step_gen (if necessary) ==
   if any([lbl in l_in for lbl in lj2_labels]):
     link(labjack2,step_gen)
   if any([lbl in l_in for lbl in [c['lbl'] for c in spectrum]]):
     link(spectrum_block,step_gen,
         condition=HFSplit(spec_labels,spec_chan,spec_gains,spec_ranges))
 
-  # Creating the graphs
+  # == Creating the graphs ==
   graphs = []
   for g in graph.values():
-    #print("Graph:",g)
     graphs.append(blocks.Grapher(*[('t(s)',lbl) for lbl in g],backend='qt4agg'))
     # Link to the concerned blocks
     if any([lbl in [c['lbl'] for c in spectrum] for lbl in g]):
+      # Note that the performance of HFSplit is uncertain, try to avoid !
       link(spectrum_block,graphs[-1],
         condition=HFSplit(spec_labels,spec_chan,spec_gains,spec_ranges))
     if any([lbl in lj2_labels for lbl in g]):
@@ -236,9 +253,11 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
     if any([lbl in in_chan.keys() for lbl in g]):
       link(labjack1,graphs[-1])
 
+  # == Creating the Drawing block (if asked to) ==
   if enable_drawing:
     from pad_config import get_drawing
     draw_block = get_drawing(lj2_labels)
     link(labjack2,draw_block)
 
+  # == ... and GO ! ==
   start()
