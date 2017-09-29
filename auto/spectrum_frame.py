@@ -3,6 +3,27 @@
 import Tkinter as tk
 
 class SpectrumFrame(tk.Frame):
+  """
+  This widget will create the frame to configure the Spectrum inputs
+
+  It has 2 main sections:
+    - Multiple input fields on the left, to type the settings of a new channel
+    - The list of the channels that were already created
+  The arrow buttons in between allow to add a channel to the list or remove it
+  and write its settings to the field to edit them.
+  You CANNOT have two channels with the same name or a channel with the same
+  name as one from the Labjack Frame.
+  Channels must be ints (0 to 15), corresponding to the channel on the card.
+
+  The label can be any unique string as long as there are no conflicts. It will
+  be used to identify it in the graphs, and will be saved in the hdf5 file.
+
+  The gain is simply saved as a metadata in the hdf5 file but it will NOT be
+  applied to the stream and it is YOUR job to convert the DL value to the
+  physical value. For simplicity, the table root.factors in the hdf5 file
+  holds the values to multiply your DL by to get the physical value
+  (assuming a gain in unit/V).
+  """
   def __init__(self,root):
     tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
     self.name = "spectrum"
