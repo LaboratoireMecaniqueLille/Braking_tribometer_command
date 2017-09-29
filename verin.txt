@@ -1,6 +1,0 @@
-# sorti:  IO2:1 IO3:0
-# rentré: IO2:0 IO3:0
-
-sortir: IO3+ IO2+ / IO3-
-
-rentrer: IO3+ / IO2- / IO3-
