@@ -209,11 +209,14 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
         samplerate=int(1000*spectrum_freq),
         streamer=True)
     # And the saver
+    # Simply multiply the chan values by its factor to get the physical value
     spectrum_save = blocks.Hdf_saver(savepath+"spectrum.h5",
         metadata={'channels':spec_chan,
                   'names':spec_labels,
                   'ranges':spec_ranges,
                   'gains':[spec_gains[k] for k in sorted(spec_gains.keys())],
+                  'factor':[r*g/32000 for r,g in zip(spec_ranges,
+                    [spec_gains[k] for k in sorted(spec_gains.keys())])],
                   'freq':int(1000*spectrum_freq),
           })
     link(spectrum_block,spectrum_save)
