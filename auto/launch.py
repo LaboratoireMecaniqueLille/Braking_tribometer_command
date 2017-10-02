@@ -2,7 +2,7 @@
 from __future__ import division, print_function
 
 from multiprocessing import Pipe
-from time import ctime,sleep
+from time import sleep
 import Tkinter as tk
 
 from crappy import blocks,start,condition,link,stop
@@ -80,9 +80,6 @@ class Bypass_trig():
 # == It interprets the settings to actually perform the test ==
 def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
   print("Let's go!",path,spectrum,lj2,graph)
-  if savepath[-1] != "/":
-    savepath += "/"
-  savepath += ctime()[:-5].replace(" ","_")+"/"
 
   # To know if step_gen has additional inputs
   l_in = [d['value'] for d in path if d['type'] == 'wait_cd']

@@ -1,13 +1,14 @@
 #coding: utf-8
 from __future__ import print_function
 
-from os import path
+import os
 import pickle
 
 import Tkinter as tk
 from tkFileDialog import askopenfilename,asksaveasfilename
 
-default_file = path.join(path.dirname(path.abspath(__file__)),"default.p")
+default_file = os.path.join(os.path.dirname(
+  os.path.abspath(__file__)),"default.p")
 
 class LoadFrame(tk.Frame):
   def __init__(self,root,frames):
@@ -71,20 +72,34 @@ class LoadFrame(tk.Frame):
           var=check_vars[f.name]).grid(row=i,column=0)
     tk.Button(top,text="Load",command=load).grid(row=i+1,column=0)
 
-  def save_conf(self):
-    def save():
-      path = asksaveasfilename(filetypes=(("Pickles","*.p"),
-        ("All files","*.*")))
+  def save_conf(self,path=None):
+    def save(path=None):
       if not path:
-        return
-      config = {}
-      for f in self.frames:
-        if check_vars[f.name]:
+        path = asksaveasfilename(filetypes=(("Pickles","*.p"),
+        ("All files","*.*")))
+        if not path:
+          return
+        config = {}
+        for f in self.frames:
+          if check_vars[f.name]:
+            config[f.name] = f.get_config()
+        top.destroy()
+      else:
+        print("DEBUG saving to "+path)
+        config = {}
+        for f in self.frames:
           config[f.name] = f.get_config()
+      d = os.path.dirname(path)
+      if d and not os.path.exists(d):
+        os.makedirs(d)
       with open(path,'wb') as f:
         pickle.dump(config,f)
       self.out("Successfully saved config at "+path)
-      top.destroy()
+
+
+    if path:
+      save(path)
+      return
     top = tk.Toplevel()
     top.title("Save")
     check_vars = {}

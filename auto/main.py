@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+from time import ctime
 import Tkinter as tk
 
 # Frames
@@ -82,10 +83,16 @@ def go():
     d.append(lj_frame.get_config())
     enable_drawing, graph_frame_config = graph_frame.get_config()
     d.append(graph_frame_config)
-    d.append(save_dir_entry.get())
+    save_dir = save_dir_entry.get()
+    if save_dir[-1] != "/":
+      save_dir += "/"
+    save_dir += ctime()[:-5].replace(" ","_")+"/"
+    d.append(save_dir)
     d.append(enable_drawing)
+    load_frame.save_conf(save_dir+"config.p")
   except Exception,e:
     output(e)
+    d[:] = []
     return
   root.destroy()
 
