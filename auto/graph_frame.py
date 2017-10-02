@@ -4,7 +4,8 @@ import Tkinter as tk
 
 class GraphFrame(tk.Frame):
   def __init__(self,root,labels_getter):
-    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
+    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.RIDGE,
+        height=350,width=600)
     self.name = "graph"
     self.get_labels = labels_getter
     self.out = root.output
@@ -19,20 +20,25 @@ class GraphFrame(tk.Frame):
     self.b_remove = tk.Button(self,text='-',command=self.del_graph)
     self.b_remove.grid(row=2,column=1)
 
-    self.graph_label_list = tk.Listbox(self)
+    self.graph_label_list = tk.Listbox(self,height=12)
     self.graph_label_list.grid(row=1,column=2,rowspan=3)
     self.b_left = tk.Button(self,text='<-',command=self.label_to_graph)
     self.b_left.grid(row=1,column=3)
     self.b_right = tk.Button(self,text='->',command=self.graph_to_label)
     self.b_right.grid(row=2,column=3)
-    self.label_list = tk.Listbox(self)
+    self.label_list = tk.Listbox(self,height=12)
     self.label_list.grid(row=1,column=4,rowspan=3)
 
     self.labels = self.get_labels()
     self.graph_dict = {}
     self.curr_graph = None
 
-  def set_config(self,graphs):
+    self.enable_drawing = tk.IntVar()
+    tk.Checkbutton(self,text="Enable the pad drawing",
+        variable=self.enable_drawing).grid(row=4,column=2)
+
+  def set_config(self,config):
+    enable_drawing,graphs = config
     self.labels = self.get_labels()
     self.graph_list.delete(0,tk.END)
     self.graph_dict = graphs
@@ -43,9 +49,13 @@ class GraphFrame(tk.Frame):
           return "Error loading graph: This label is not defined: "+l
     for g in self.graph_dict:
       self.graph_list.insert(tk.END,g)
+    if enable_drawing:
+      self.enable_drawing.set(1)
+    else:
+      self.enable_drawing.set(0)
 
   def get_config(self):
-    return self.graph_dict
+    return self.enable_drawing.get(),self.graph_dict
 
   ## CALLBACKS
   def select_graph(self,event=None):

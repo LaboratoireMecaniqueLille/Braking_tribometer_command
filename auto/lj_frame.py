@@ -4,7 +4,8 @@ import Tkinter as tk
 
 class LJFrame(tk.Frame):
   def __init__(self,root):
-    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
+    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.RIDGE,
+        height=350,width=600)
     self.name = "lj"
     self.root = root
     self.title = tk.Label(self,text="Labjack",
@@ -47,7 +48,7 @@ class LJFrame(tk.Frame):
     self.c_zero.grid(row=6,column=1)
 
     tk.Label(self,text="Frequency (Hz)").grid(row=7,column=1)
-    self.freq_entry = tk.Entry(self)
+    self.freq_entry = tk.Entry(self,width=8)
     self.freq_entry.insert(0,"200")
     self.freq_entry.grid(row=7,column=2)
 

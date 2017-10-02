@@ -25,7 +25,8 @@ class SpectrumFrame(tk.Frame):
   (assuming a gain in unit/V).
   """
   def __init__(self,root):
-    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
+    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.RIDGE,
+        height=350,width=600)
     self.name = "spectrum"
     self.root = root
     self.title = tk.Label(self,text=self.name.capitalize(),
@@ -59,7 +60,7 @@ class SpectrumFrame(tk.Frame):
     self.t_gain.grid(row=4,column=1)
 
     tk.Label(self,text="Frequency (kHz)").grid(row=7,column=1)
-    self.freq_entry = tk.Entry(self)
+    self.freq_entry = tk.Entry(self,width=8)
     self.freq_entry.insert(0,"100")
     self.freq_entry.grid(row=7,column=2)
 

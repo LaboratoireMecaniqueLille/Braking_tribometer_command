@@ -18,15 +18,14 @@ from load_frame import LoadFrame
 from launch import launch
 from lj1_chan import in_chan
 
-
 root = tk.Tk()
 
 # This widget is used to display help messages and errors
 help_txt = tk.Text(width=80,height=15)
-help_txt.grid(row=2,column=0)
+help_txt.grid(row=2,column=0,columnspan=2)
 d = []
 
-# This function is used to print a message in the help widget
+# This function is meant to print a message in the help widget
 def output(s):
   """
   To write s in the help_txt box.
@@ -41,13 +40,13 @@ root.output = output
 
 # == Creating the main frames ==
 path_frame = PathFrame(root)
-path_frame.grid(row=0,column=0)
+path_frame.grid(row=0,column=0,columnspan=2)
 
 lj_frame = LJFrame(root)
-lj_frame.grid(row=1,column=0)
+lj_frame.grid(row=1,column=0,columnspan=2)
 
 spectrum_frame = SpectrumFrame(root)
-spectrum_frame.grid(row=0,column=1)
+spectrum_frame.grid(row=0,column=2)
 
 # The graph frame needs a way to know the name of the available labels
 def get_labels():
@@ -67,12 +66,12 @@ def get_labels():
   return l
 
 graph_frame = GraphFrame(root,get_labels)
-graph_frame.grid(row=1,column=1)
+graph_frame.grid(row=1,column=2)
 
 frames = [path_frame,lj_frame,spectrum_frame,graph_frame]
 
 load_frame = LoadFrame(root, frames)
-load_frame.grid(row=2,column=1)
+load_frame.grid(row=2,column=2)
 
 # == Creating the GO button and its callback ==
 def go():
@@ -81,9 +80,10 @@ def go():
     d.append(path_frame.get_path())
     d.append(spectrum_frame.get_config())
     d.append(lj_frame.get_config())
-    d.append(graph_frame.get_config())
+    enable_drawing, graph_frame_config = graph_frame.get_config()
+    d.append(graph_frame_config)
     d.append(save_dir_entry.get())
-    d.append(enable_drawing.get())
+    d.append(enable_drawing)
   except Exception,e:
     output(e)
     return
@@ -105,11 +105,6 @@ save_dir_entry.insert(0,save_dir)
 save_dir_entry.grid(row=3,column=0)
 save_dir_button = tk.Button(root,text="...",command=choose_dir)
 save_dir_button.grid(row=3,column=1)
-
-# == Should we add the drawing block ? ==
-enable_drawing = tk.IntVar()
-tk.Checkbutton(root,text="Enable the pad drawing",
-    variable=enable_drawing).grid(row=4,column=1)
 
 # == And go! ==
 root.mainloop()

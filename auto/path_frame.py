@@ -43,16 +43,21 @@ class PathFrame(tk.Frame):
   """
   def __init__(self,root):
     self.name = "path"
-    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.GROOVE)
+    tk.Frame.__init__(self,root,borderwidth=2,relief=tk.RIDGE,
+        height=350,width=600)
     self.root = root
+    self.rowconfigure(0,weight=1)
+    self.rowconfigure(1,weight=1)
+    self.columnconfigure(0,weight=1)
+    self.columnconfigure(1,weight=1)
     self.title = tk.Label(self,text=self.name.capitalize(),
         font=("Helvetica",20))
     self.title.grid(row=0,column=0,columnspan=10)
     self.out = root.output
-    self.textbox = tk.Text(self,width=50,height=10)
+    self.textbox = tk.Text(self,width=60,height=15)
     self.textbox.grid(row=1,column=0)
     self.textbox.bind('<1>',lambda *a: self.out(HELP))
-    self.path_list = tk.Listbox(self)
+    self.path_list = tk.Listbox(self,height=14)
     self.path_list.grid(row=1,column=1)
     self.path_list.insert(tk.END,*[f.__name__ for f in funcs])
     self.path_list.bind("<<ListboxSelect>>",self.update_help)

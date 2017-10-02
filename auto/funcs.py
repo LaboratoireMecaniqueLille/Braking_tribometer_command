@@ -286,7 +286,7 @@ def prepare_path(path):
     d['type'] = 'constant'
 
   # ==== Facultative: display path for debug =====
-  #"""
+  """
   def display_state():
     for d,s in zip(paths['state'],paths['status']):
       print(" ",s)
@@ -308,5 +308,5 @@ def prepare_path(path):
   display(paths['pad'])
   print("Hydrau:")
   display(paths['hydrau'])
-  #"""
+  """
   return paths

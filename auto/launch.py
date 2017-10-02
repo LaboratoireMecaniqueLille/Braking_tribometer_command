@@ -79,7 +79,7 @@ class Bypass_trig():
 # ==        This function is the core of the program:        ==
 # == It interprets the settings to actually perform the test ==
 def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
-  #print("Let's go!",path,spectrum,lj2,graph)
+  print("Let's go!",path,spectrum,lj2,graph)
   if savepath[-1] != "/":
     savepath += "/"
   savepath += ctime()[:-5].replace(" ","_")+"/"
@@ -215,7 +215,7 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
                   'names':spec_labels,
                   'ranges':spec_ranges,
                   'gains':[spec_gains[k] for k in sorted(spec_gains.keys())],
-                  'factor':[r*g/32000 for r,g in zip(spec_ranges,
+                  'factor':[r*g/32000000 for r,g in zip(spec_ranges,
                     [spec_gains[k] for k in sorted(spec_gains.keys())])],
                   'freq':int(1000*spectrum_freq),
           })
