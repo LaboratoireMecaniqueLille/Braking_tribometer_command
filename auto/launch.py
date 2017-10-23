@@ -211,9 +211,9 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
         metadata={'channels':spec_chan,
                   'names':spec_labels,
                   'ranges':spec_ranges,
-                  'gains':[spec_gains[k] for k in sorted(spec_gains.keys())],
+                  'gains':[spec_gains[k] for k in spec_chan],
                   'factor':[r*g/32000000 for r,g in zip(spec_ranges,
-                    [spec_gains[k] for k in sorted(spec_gains.keys())])],
+                    spec_chan)],
                   'freq':int(1000*spectrum_freq),
           })
     link(spectrum_block,spectrum_save)

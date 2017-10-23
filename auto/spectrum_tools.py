@@ -19,8 +19,12 @@ class HFSplit:
 def check_chan(chan,labels,ranges,gains):
   """
   To make sure we follow the rules for channel opening (see sepctrum doc)
+
   0,1,2,4 or 8 per module, same number of channel per module if both are used
   If this is not respected, open unused channels to comply
+  Also, order the label correctly to comply with Spectrum multiplexing
+  (Alternate on each module in numerical order)
+  Ex: 0,2,9,10 are open, data will be 0,9,2,10,0,9,...
   """
   chan,labels,ranges = [list(t) for t in zip(*sorted(zip(chan,labels,ranges)))]
   assert all([c in range(16) for c in chan]),\
@@ -30,6 +34,7 @@ def check_chan(chan,labels,ranges,gains):
   labels = labels[:num],labels[num:]
   ranges = ranges[:num],ranges[num:]
   nchan = max(len(chan[0]),len(chan[1]))
+  both = bool(chan[0] and chan[1])
   while nchan not in [1,2,4,8]:
     nchan += 1
   if len(chan[0]) not in (0,nchan) or len(chan[1]) not in (0,nchan):
@@ -46,5 +51,9 @@ def check_chan(chan,labels,ranges,gains):
     chan[1].append(left[0])
     labels[1].append('UNUSED%d'%left[0])
     ranges[0].append(10000)
-    gains[left[1]] = 1
-  return zip(*sorted(zip(sum(chan,[]),sum(labels,[]),sum(ranges,[]))))+[gains]
+    gains[left[0]] = 1
+  k = lambda e:e[0]%8+e[0]//8*.5 if both else None
+  rchan,rlabel,rrange,rgain = \
+      zip(*sorted(zip(sum(chan,[]),sum(labels,[]),sum(ranges,[])),key=k))+[gains]
+
+  return rchan,rlabel,rrange,rgain
