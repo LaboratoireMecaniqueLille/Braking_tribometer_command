@@ -17,8 +17,8 @@ points = [
 
 
 coord_disc = [
-    ('Tdisc1',(100,800)),
-    ('Tdisc2',(100,920)),
+    ('T12',(100,800)),
+    ('T13',(100,920)),
 ]
 
 trange = [20,300] # Temperature scale
