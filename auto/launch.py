@@ -213,7 +213,7 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
                   'ranges':spec_ranges,
                   'gains':[spec_gains[k] for k in spec_chan],
                   'factor':[r*g/32000000 for r,g in zip(spec_ranges,
-                    spec_chan)],
+                    [spec_gains[k] for k in spec_chan])],
                   'freq':int(1000*spectrum_freq),
           })
     link(spectrum_block,spectrum_save)
