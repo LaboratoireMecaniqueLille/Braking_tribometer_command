@@ -183,23 +183,28 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
 
   # == Creating the Spectrum block ==
   spec_chan = []
-  spec_labels = []
-  spec_ranges = []
+  spec_labels = {}
+  spec_ranges = {}
   spec_gains = {}
 
   spectrum_freq,spectrum = spectrum
   for c in spectrum:
     spec_chan.append(c['chan'])
-    spec_labels.append(c['lbl'])
+    spec_labels[c['chan']] = c['lbl']
     c['range'] = int(1000*c['range']) # V to mV
-    spec_ranges.append(c['range']\
-        if c['range'] in [50,250,500,1000,2000,5000,10000] else 10000)
+    spec_ranges[c['chan']] = c['range']\
+        if c['range'] in [50,250,500,1000,2000,5000,10000] else 10000
     spec_gains[c['chan']] = c['gain']
   if spectrum: # If the spectrum is not used, don't create the blocks
     from spectrum_tools import HFSplit,check_chan
     # check_chan will make sure that the user opens the correct chans (see doc)
-    spec_chan,spec_labels,spec_ranges,spec_gains = \
-        check_chan(spec_chan,spec_labels,spec_ranges,spec_gains)
+    spec_chan = check_chan(spec_chan)
+
+    for c in spec_chan:
+      if c not in spec_labels:
+        spec_labels[c] = "UNUSED%d"%c
+        spec_ranges[c] = 10000
+        spec_gains[c] = 1
 
     spectrum_block = blocks.IOBlock("spectrum",channels=spec_chan,
         ranges=spec_ranges,
@@ -209,10 +214,10 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
     # Simply multiply the chan values by its factor to get the physical value
     spectrum_save = blocks.Hdf_saver(savepath+"spectrum.h5",
         metadata={'channels':spec_chan,
-                  'names':spec_labels,
-                  'ranges':spec_ranges,
+                  'names':[spec_labels[k] for k in spec_chan],
+                  'ranges':[spec_ranges[k] for k in spec_chan],
                   'gains':[spec_gains[k] for k in spec_chan],
-                  'factor':[r*g/32000000 for r,g in zip(spec_ranges,
+                  'factor':[r*g/32000000 for r,g in zip([spec_ranges[k] for k in spec_chan],
                     [spec_gains[k] for k in spec_chan])],
                   'freq':int(1000*spectrum_freq),
           })
