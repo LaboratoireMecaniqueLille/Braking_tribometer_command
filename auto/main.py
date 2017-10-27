@@ -20,6 +20,7 @@ from launch import launch
 from lj1_chan import in_chan
 
 root = tk.Tk()
+root.title("Crappy tribo: auto mode V0.1")
 
 # This widget is used to display help messages and errors
 help_txt = tk.Text(width=80,height=15)

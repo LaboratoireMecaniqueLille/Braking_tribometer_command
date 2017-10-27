@@ -2,7 +2,7 @@
 from __future__ import print_function
 
 __all__ = ["goto","wait","slow","slow_p","cst_f",\
-    "cst_p","cst_c","wait_cd","funcs"]
+    "cst_p","cst_t","wait_cd","funcs"]
 
 # ========= Definition of the simples functions to expose to the user
 # and the functions that will turn each path into the path for the actuators
@@ -152,7 +152,7 @@ def make_cstf(force,delay):
   paths['hydrau'].append(
       {'type':'constant','value':0,'condition':'step>'+str(i)})
 
-def cst_c(torque,delay):
+def cst_t(torque,delay):
   """
 Will try to apply a constant torque on the axis (at constant speed).
 
@@ -241,7 +241,7 @@ def make_end():
 
 # ==================
 
-funcs = [goto,wait,slow,slow_p,cst_f,cst_c,cst_p,wait_cd]
+funcs = [goto,wait,slow,slow_p,cst_f,cst_t,cst_p,wait_cd]
 
 avail = {'goto':make_goto,
          'wait':make_wait,
