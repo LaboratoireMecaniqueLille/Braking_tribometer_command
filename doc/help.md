@@ -12,9 +12,9 @@ Crappy Tribometer V0.1 Documentation
 
 Welcome to the documentation of the LML breaking tribometer.
 
-The goal of this document is to provide user and developper level help for
+The goal of this document is to provide user and developer level help for
 this Python program, meant to drive the breaking tribometer.
-It was developped by Victor Couty on Sept/Oct 2017.
+It was developed by Victor Couty on Sept/Oct 2017.
 The code of this project is hosted on
 [GitHub](https://github.com/LaboratoireMecaniqueLille/Tribo.git).
 
@@ -28,17 +28,18 @@ The goal of this project
     * Customizable acquisition of all the sensors
 
 * Provide scripts for efficient preparation of the tests such as manually
-  driving the acutators, measuring and plotting the disc displacement, etc...
+  driving the actuators, measuring and plotting the disc displacement, etc...
 
 The first one is accomplished by all the code in the auto/ folder and
 the second by the code in tool/
 
-This project is based on "CRAPPY", an other project developped by the LML which
-can be found here: https://github.com/LaboratoireMecaniqueLille/crappy.git
+This project is based on
+[CRAPPY](https://github.com/LaboratoireMecaniqueLille/crappy.git),
+an other project developed by the LML.
+
 Crappy is a Python module meant to run complex tests on a wide variety of
 hardware. For more information, please refer to the page of the project or
-the documentation available at:
-https://laboratoiremecaniquelille.github.io/crappy/
+[the documentation](https://laboratoiremecaniquelille.github.io/crappy/).
 
 If you are reading this document to get familiar with this bench,
 I strongly suggest reading the [hardware help page](hardware.html) while
@@ -73,19 +74,19 @@ The bench has 3 IO boards:
 And many sensors:
 
 * Torque-meter
-* Speed (returned by the main motor variator)
+* Speed (returned by the main motor converter)
 * 3 Axis force on the pad
 * Spring force
 * 2 Thermocouples in the disc, up to 11 in the pad
 * Position sensor for the disc and the pad
 
-For more detail on the harware, please refer to the
+For more details on the hardware, please refer to the
 [hardware help page](hardware.html)
 
 Software overview
 =================
-The folder tools/ contains several scipts to perform several operations on
-the bench: manually driving the bench, reading sensors independatly,
+The folder tools/ contains several scripts to perform several operations on
+the bench: manually driving the bench, reading sensors independently,
 flashing the Labjack, etc...
 
 Each script is described in the [tools help page](tools.html)

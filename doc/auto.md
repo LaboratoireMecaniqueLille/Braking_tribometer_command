@@ -12,3 +12,4 @@ TODO
 * Describe the code of the auto mode
   * Adding a function
   * Configuring lj1
+

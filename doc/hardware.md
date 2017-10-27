@@ -10,6 +10,9 @@ Content
 This page presents all the information about the hardware currently in use
 for the bench.
 
+TODO
+====
+* Add pictures !
 
 The main Labjack
 ================
@@ -43,7 +46,7 @@ Also, these channels can be saved and plotted.
 
 The secondary Labjack
 =====================
-It is a labjack T7-PRO, deported on the bench and read through an Ethernet link.
+It is a Labjack T7-PRO, deported on the bench and read through an Ethernet link.
 It is meant to read all the thermocouples, but can read any analog voltage
 at max ~200Hz (input only).
 All the inputs can be configured in the GUI, with custom channel, gain and
@@ -70,11 +73,11 @@ The main motor
 ==============
 This motor is driven by an analog voltage (coming from the first Labjack).
 It can rotate at any speed between 10 and 4000 rpm). The gain for the command
-is 412rpm/V. The variator also returns the actual speed of the axle, with
-the same gain. It is driven in speed, so the variator has an internal corrector
+is 412rpm/V. The converter also returns the actual speed of the axle, with
+the same gain. It is driven in speed, so the converter has an internal corrector
 regulating the current for the motor. This allows for a simple inertia
 simulation by forcing the speed based on the readings of the torque-meter.
-It is computed by the program so intertia simulation loops at around 300 Hz.
+It is computed by the program so inertia simulation loops at around 300 Hz.
 
 The pad motor
 =============
@@ -116,7 +119,7 @@ Torque meter
 ------------
 Gain: -50 Nm/V
 
-Located between the flywheel and the disc. It is conditionned by the
+Located between the flywheel and the disc. It is conditioned by the
 grey box on the left of the bench. The default offset may vary so
 it is measured at initialisation of the bench and deduced to the readings.
 THIS MEANS THAT THE AXLE MUST BE COMPLETELY FREE WHEN STARTING THE PROGRAM!
@@ -125,7 +128,7 @@ Spring force sensor
 -------------------
 Gain: 2061.3 N/V
 
-Located between the spring and the pad. The conditionner is in the grey box
+Located between the spring and the pad. The converter is in the grey box
 on the left of the bench.
 Note that this force is not only applied to the pad, but also used to deform
 the frame of the pad support, which require around 136 N, depending on the
@@ -136,9 +139,9 @@ settings of the bench. The offset is around 110 N.
 Gain: 500N/V
 
 The pad is mounted on this piezo-electric sensor. Due to high thermal
-sensivity, a water-cooled part is mounted between the pad and the sensor.
-DO NOT FORGET TO OPEN THE WATER TO PREVENT DAMAGING THE SENSOR!
-Each cell is read by an individual conditionner in the control room. The
+sensitivity, a water-cooled part is mounted between the pad and the sensor.
+**Do not forget to open the water to prevent damaging the sensor!**
+Each cell is read by an individual conditioner in the control room. The
 zero can be made manually or through a serial command.
 
 
@@ -146,7 +149,7 @@ Speed
 -----
 Gain: 413 rpm/V
 
-It is not really a sensor, it is the speed returned by the variator of the main
+It is not really a sensor, it is the speed returned by the converter of the main
 motor. It is used to make sure to reach the target speed before the breaking.
 
 Position sensors
@@ -154,17 +157,17 @@ Position sensors
 gain: 250 µm/V
 
 One of them is mounted on the pad frame, the second is usually mounted
-on a comparator arm in front of the disc. The conditionner is the
+on a comparator arm in front of the disc. The conditioner is the
 "Capacitec" black box on the left of the bench.
 These capacitive sensors can measure the distance to the facing metallic
 surface at up to 2.5mm. They have a very short response time and can
 measure the disc profile at full speed. They resist heat up to 800°C but
-are very sensitive to short circuits and must NOT touch any metallic surface
+are very sensitive to short circuits and must **not** touch any metallic surface
 when powered. Make sure the gap is large enough to avoid contact during the
 test and never manipulate this sensor without unplugging it.
 
 Other sensors
 -------------
 Of course, any sensor can be added for specific tests. High frequency
-acquisiton can be done on the Spectrum with a BNC cable and a voltage
+acquisition can be done on the Spectrum with a BNC cable and a voltage
 in a range between +/-50mV and +/- 10V.
