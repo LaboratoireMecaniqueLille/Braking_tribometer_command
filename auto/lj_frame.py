@@ -54,6 +54,9 @@ class LJFrame(tk.Frame):
 
 
   def get_entry(self):
+    """
+    Returns the dict representing a channel
+    """
     d = {}
     d['lbl'] = self.t_lbl.get()
     assert d['lbl'],"Cannot use an empty label"

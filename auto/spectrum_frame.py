@@ -65,6 +65,9 @@ class SpectrumFrame(tk.Frame):
     self.freq_entry.grid(row=7,column=2)
 
   def get_entry(self):
+    """
+    Returns the dict representing a channel
+    """
     d = {}
     d['lbl'] = self.t_lbl.get()
     assert d['lbl'],"Cannot use an empty label"

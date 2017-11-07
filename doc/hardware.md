@@ -14,6 +14,8 @@ TODO
 ====
 * Add pictures !
 
+![diagram](../img/diagram_low.png)
+
 The main Labjack
 ================
 Currently connected by USB, right under the desk.
