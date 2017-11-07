@@ -10,11 +10,22 @@ Content
 This page presents all the information about the hardware currently in use
 for the bench.
 
-TODO
-====
-* Add pictures !
+Global description
+==================
 
 ![diagram](../img/diagram_low.png)
+
+This image sums up the driving of the bench. Acquisition is not represented.
+All the actuators are driven by the main Labjack. The pad motor also has a
+serial input to enable or disable the analog input or set a given position.
+The left section represents software entities (Crappy blocks) and the right
+side shows the hardware involved in the command loop.
+
+![global view](../img/tribo1.jpg)
+
+![Disc view](../img/tribo2.jpg)
+
+![Axle view](../img/tribo3.jpg)
 
 The main Labjack
 ================
