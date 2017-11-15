@@ -56,3 +56,16 @@ temp.py
 This little script can read the thermocouples in the pad and in the disc
 and print them on a map, just like during a test. This can be useful to
 monitor the temperature when cooling between tests.
+
+spectrum_single_chan.py
+=======================
+This file can read data from a single channel of the Spectrum and plot it.
+It can be useful for settings. Here the example reads the pad real position
+from the second capacitive sensor, but the gain and channel can be adjusted
+to your needs.
+
+spectrum.py
+===========
+Just like spectrum_single_chan.py, but it can read multiple channels at once.
+In this example, it reads all the channels in Volts (gain=1) on the
+-/+10V range.
