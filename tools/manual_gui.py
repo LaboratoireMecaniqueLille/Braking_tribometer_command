@@ -18,14 +18,23 @@ class Graph(object):
     self.axl.grid()
     self.rline = []
     self.lline = []
+    llabel = ['force','speed']
+    rlabel = ['torque']
 
     for i in range(left):
-      self.lline.append(self.axl.plot([],[])[0])
+      self.lline.append(self.axl.plot([],[],label=llabel[i])[0])
       # To avoid restarting the color cycle on the second y axis:
-      next(self.axr._get_lines.color_cycle)
+      try:
+        # Older matplotlib versions
+        next(self.axr._get_lines.color_cycle)
+      except AttributeError:
+        # Newer matplotlib versions
+        next(self.axr._get_lines.prop_cycler)
+    self.axl.legend(loc=2)
     for i in range(right):
-      self.rline.append(self.axr.plot([],[])[0])
+      self.rline.append(self.axr.plot([],[],label=rlabel[i])[0])
     self.canvas = FigureCanvasTkAgg(self.fig,master=root)
+    self.axr.legend(loc=1)
     self.canvas.show()
     plt.grid()
 
@@ -56,8 +65,6 @@ class Graph(object):
     plt.close()
 
 tempo_hydrau = .2
-#lj1 = crappy.inout.Labjack_t7(identifier="470012972",
-    #out_channels="TDAC0",out_gain=1/400) # T7
 lj1 = crappy.inout.Labjack_t7(identifier="470012972",channels=[
   {'name':'TDAC0','gain':1/412},
   {'name':'AIN0','gain':2061.3,'make_zero':False,'offset':110}, # Pad force
