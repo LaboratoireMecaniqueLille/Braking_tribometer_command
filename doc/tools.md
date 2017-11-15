@@ -50,3 +50,9 @@ the displacement in µm function of the angle (in deg). To do so it detects
 the tops from the sensor. Make sure to set the correct number of tops
 per revolution in the file, and the correct gains.
 Please have a look at the code for more information.
+
+temp.py
+=======
+This little script can read the thermocouples in the pad and in the disc
+and print them on a map, just like during a test. This can be useful to
+monitor the temperature when cooling between tests.
