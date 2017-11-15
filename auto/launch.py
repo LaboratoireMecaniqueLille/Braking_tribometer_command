@@ -2,12 +2,15 @@
 from __future__ import division, print_function
 
 from multiprocessing import Pipe
+import serial
 from time import sleep
 import Tkinter as tk
 
 from crappy import blocks,start,condition,link,stop
 
 from funcs import prepare_path
+
+ports_5018 = ['/dev/ttyS5','/dev/ttyS6','/dev/ttyS7']
 
 class Popup(blocks.MasterBlock):
   """
@@ -263,6 +266,11 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
     from pad_config import get_drawing
     draw_block = get_drawing(lj2_labels)
     link(labjack2,draw_block)
+
+  # == Last thing: reset the 5018 conditionners ==
+  for port in ports_5018:
+    serial.Serial(port).write('9,0\r\n9,1\r\n')
+    sleep(.1)
 
   # == ... and GO ! ==
   start()
