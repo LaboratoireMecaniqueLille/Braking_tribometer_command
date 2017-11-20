@@ -23,4 +23,5 @@ out_chan = {
     'lj1_h3':{'name':'FIO3','direction':True},
     'lj1_fcmd':{'name':46000,'direction':True},
     'lj1_fmode':{'name':46002,'direction':True},
+    'lj1_trig':{'name':'DAC0'},
     }

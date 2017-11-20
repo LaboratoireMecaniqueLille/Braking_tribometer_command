@@ -156,6 +156,13 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
     "mode":"position", "device":"/dev/ttyS4"}])
   link(padpos_gen,servostar)
 
+  # == Creating the pulse generator to trig the camera ==
+  gen_trig = blocks.Generator(
+      [dict(type='constant',value=0,condition='delay=1'),
+      dict(type='constant',value=5,condition='delay=1'),
+      dict(type='constant',value=0,condition=None),
+      ],cmd_label='lj1_trig',freq=2)
+
   # == Creating the first Labjack, config is read from lj1_chan.py ==
   from lj1_chan import in_chan,out_chan,identifier
   lj1_chan = []
@@ -175,6 +182,7 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
   link(gen_fio3,labjack1)
   link(force_gen,labjack1,condition=Bypass(bp_p2,{'lj1_fcmd':0}))
   link(fmode_gen,labjack1,condition=Bypass(bp_p2,{'lj1_fmode':0}))
+  link(gen_trig,labjack1)
 
   link(labjack1,speed_gen)
   link(labjack1,step_gen)
@@ -269,7 +277,7 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
 
   # == Last thing: reset the 5018 conditionners ==
   for port in ports_5018:
-    serial.Serial(port).write('9,0\r\n9,1\r\n')
+    serial.Serial(port,baudrate=115200).write('9,0\r\n9,1\r\n')
     sleep(.1)
 
   # == ... and GO ! ==
