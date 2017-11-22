@@ -277,8 +277,12 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
 
   # == Last thing: reset the 5018 conditionners ==
   for port in ports_5018:
-    serial.Serial(port,baudrate=115200).write('9,0\r\n9,1\r\n')
+    s = serial.Serial(port,baudrate=115200)
+    s.write('9,0\r\n')
     sleep(.1)
+    s.write('9,1\r\n')
+    sleep(.1)
+    s.close()
 
   # == ... and GO ! ==
   start()
