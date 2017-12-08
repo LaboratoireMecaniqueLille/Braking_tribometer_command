@@ -10,6 +10,9 @@ from crappy import blocks,start,condition,link,stop
 
 from funcs import prepare_path
 
+# Set to false if you don't want to write the lua script on the main Labjack
+FLASH_LJ = True
+
 ports_5018 = ['/dev/ttyS5','/dev/ttyS6','/dev/ttyS7']
 
 class Popup(blocks.MasterBlock):
@@ -165,6 +168,17 @@ def launch(path,spectrum,lj2,graph,savepath,enable_drawing):
 
   # == Creating the first Labjack, config is read from lj1_chan.py ==
   from lj1_chan import in_chan,out_chan,identifier
+  if FLASH_LJ:
+    from flash_lj import flash
+    from labjack import ljm
+    import os
+    print("Flashing the Labjack...")
+    h = ljm.openS(identifier=identifier)
+    lua_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+        "pid_lj.lua")
+    flash(h,open(lua_file,"r").read())
+    ljm.close(h)
+    print("Flashing done!")
   lj1_chan = []
   lj1_labels = ['t(s)']
   lj1_out_labels = []
