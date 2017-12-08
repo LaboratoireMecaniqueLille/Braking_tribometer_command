@@ -20,14 +20,6 @@ the hydraulic in or out with the two buttons. It is not a "real" Crappy
 program, but it uses the Labjack class for simplicity. Note that no data
 will be saved when running this program.
 
-flash_lj.py
-===========
-This code allows to write the lua script to the Labjack. This script hosts
-the PI corrector to drive the pad motor. It runs at 1 kHz. It reads the
-file from pid_lj.lua, removes the comments (they take up space in the labjack)
-and writes it to the labjack. Make sure you are opening the correct labjack !
-Once written, it enables the script by writing 1 to the LUA_RUN register.
-
 hdftocsv.py
 ===========
 As its name suggests, it can turn HDF files from the Spectrum to csv. Obviously

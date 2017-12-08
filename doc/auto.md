@@ -191,3 +191,17 @@ pad_config.py
 This file sets the labels and their coordinates for the block that displays
 the temperatures on the pad during the test. These labels must be read from
 the second Labjack. If a label does not exist, it will be omitted.
+
+flash_lj.py
+-----------
+This code allows to write the lua script to the Labjack. This script hosts
+the PI corrector to drive the pad motor. It runs at 1 kHz. It reads the
+file from pid_lj.lua, removes the comments (they take up space in the labjack)
+and writes it to the labjack. Make sure you are opening the correct labjack !
+Once written, it enables the script by writing 1 to the LUA_RUN register.
+
+pid_lj.lua
+----------
+This is the code that will drive the pad to get a given force.
+It is a PI corrector, that can be disabled at will. It can also
+apply a given torque if the mode is set to 2.
