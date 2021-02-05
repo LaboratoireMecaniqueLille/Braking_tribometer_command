@@ -1,4 +1,4 @@
-Breaking tribometer
+Braking tribometer
 ===================
 
 This git repository is the code that drives the breaking tribometer
