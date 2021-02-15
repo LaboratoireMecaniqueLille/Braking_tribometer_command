@@ -13,7 +13,7 @@ It is divided in 4 sections: Path, Labjack, Spectrum and Graph. There is a help
 section on the bottom-left hand corner, and load/save buttons to manage
 configurations.
 
-![Main interface](../img/interface.png)
+![Main interface](img/interface.png)
 
 When the user clicks "GO", this window disappears, only leaving a pop-up that
 allows to interrupt the test and states the current step, and the graphs
@@ -30,7 +30,7 @@ This folder will contain 4 files:
 
 Path
 ----
-![Path frame](../img/path.png)
+![Path frame](img/path.png)
 
 This frame defines the steps of the test. Each step can be added by calling
 a function. The test will be entirely defined by the content of (A).
@@ -155,7 +155,7 @@ how to add another type of step in the program.
 
 Spectrum
 --------
-![Spectrum frame](../img/spectrum.png)
+![Spectrum frame](img/spectrum.png)
 
 This frame is used to configure the channels to be acquired by the Spectrum
 PCI card. To add a channel, simply fill the fields (A) and click the
@@ -250,7 +250,7 @@ is run in "single" mode.
 
 Graph
 -----
-![Graph frame](../img/graph.png)
+![Graph frame](img/graph.png)
 
 This frame is used to create graphs that will display data in real time during
 the test. You can add a graph by pressing the (+) button, remove one by

@@ -122,7 +122,7 @@ the chosen commands. Finally, add them both to the 'avail' dict.
 
 launch.py
 ---------
-![diagram](../img/diagram_low.png)
+![diagram](img/diagram_low.png)
 
 This is the core of the program: this file defines a function 'launch' that
 does all the work: it takes the configuration as arguments and then creates
