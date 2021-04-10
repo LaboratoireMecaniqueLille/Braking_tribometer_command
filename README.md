@@ -1,7 +1,7 @@
 Braking tribometer
 ===================
 
-This git repository is the code that drives the breaking tribometer
+This git repository is the code that drives the braking tribometer
 of the the LamCube. It relies on the open-source project "Crappy" which
 can be found [here](https://github.com/LaboratoireMecaniqueLille/crappy).
 
