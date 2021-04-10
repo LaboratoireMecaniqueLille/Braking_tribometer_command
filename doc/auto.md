@@ -1,11 +1,11 @@
 Content
 -------
 
-* [Main page](help.html)
-* [Hardware description](hardware.html)
-* [Auto mode interface](interface.html)
+* [Main page](help.md)
+* [Hardware description](hardware.md)
+* [Auto mode interface](interface.md)
 * Auto mode code description (this page)
-* [Tools description](tools.html)
+* [Tools description](tools.md)
 
 Architecture of the code
 ========================
@@ -156,7 +156,7 @@ program relies on these channels, but you can simply add other channels
 by adding lines to this file.
 
 The main Labjack runs an internal PI script written in LUA (see flash_lj.py in
-[Tools description](tools.html)). It has 3 modes: disabled (0), force mode (1)
+[Tools description](tools.md)). It has 3 modes: disabled (0), force mode (1)
 and torque mode (2). The mode can be changed by writing the 46002 register.
 It must be kept to 0 when the PI is not running, to avoid diverging.
 This script reads the setpoint from register 46000.
