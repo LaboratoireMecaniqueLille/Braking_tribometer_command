@@ -1,11 +1,11 @@
 Content
 -------
 
-* [Main page](help.html)
-* [Hardware description](hardware.html)
+* [Main page](help.md)
+* [Hardware description](hardware.md)
 * Auto mode interface (this page)
-* [Auto mode code description](auto.html)
-* [Tools description](tools.html)
+* [Auto mode code description](auto.md)
+* [Tools description](tools.md)
 
 Using the interface
 ===================
@@ -117,7 +117,7 @@ argument in rpm (default is 0, so a complete stop).
 This step is just like slow, except that the pad motor will stay completely
 still. Instead of giving the force, simply give the pad position (in µm).
 To know what position approximately corresponds to a force, you can use the
-manual mode (see [Tools description](tools.html)), set a force with the PID
+manual mode (see [Tools description](tools.md)), set a force with the PID
 and read the associated position.
 Beware that positive values move away from the disc and negative values get
 closer.
@@ -149,7 +149,7 @@ val must be a numerical value and cannot be another label.
 
 #### Adding a function
 All these functions are defined in auto/funcs.py, see
-[Auto mode code description](auto.html) for more info on the code and learn
+[Auto mode code description](auto.md) for more info on the code and learn
 how to add another type of step in the program.
 
 
@@ -207,7 +207,7 @@ Labjack
 This frame is used to configure the **second** Labjack
 (the one linked by Ethernet)
 and used for acquisition only. The main Labjack cannot be configured with the
-GUI but by editing a file, see [Auto mode code description](auto.html)
+GUI but by editing a file, see [Auto mode code description](auto.md)
 for more information.
 
 Just like the Spectrum frame, it is used to configure the channels of the
@@ -267,7 +267,7 @@ It will show the pad with the readings of the thermocouples and a
 colorbar to visualize the heat distribution on the pad. This window
 cannot be configured with the GUI but it is simple to change its configuration
 by editing auto/pad_config.py. For more details, see
-[Auto mode code description](auto.html).
+[Auto mode code description](auto.md).
 
 
 Saving/Loading
