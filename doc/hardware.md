@@ -1,11 +1,11 @@
 Content
 -------
 
-* [Main page](help.md)
+* [Main page](help.html)
 * Hardware description (this page)
-* [Auto mode interface](interface.md)
-* [Auto mode code description](auto.md)
-* [Tools description](tools.md)
+* [Auto mode interface](interface.html)
+* [Auto mode code description](auto.html)
+* [Tools description](tools.html)
 
 This page presents all the information about the hardware currently in use
 for the bench.
