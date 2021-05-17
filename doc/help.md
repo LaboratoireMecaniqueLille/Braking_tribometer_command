@@ -39,7 +39,7 @@ another project developed by the LML.
 
 Crappy is a Python module meant to run complex tests on a wide variety of
 hardware. For more information, please refer to the page of the project or
-[the documentation](https://crappy.readthedocs.io/en/latest/).
+[the documentation](https://laboratoiremecaniquelille.github.io/crappy/).
 
 If you are reading this document to get familiar with this bench,
 I strongly suggest reading the [hardware help page](hardware.md) while
