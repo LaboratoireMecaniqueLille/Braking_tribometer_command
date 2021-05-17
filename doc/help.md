@@ -89,7 +89,7 @@ The folder tools/ contains several scripts to perform several operations on
 the bench: manually driving the bench, reading sensors independently,
 flashing the Labjack, etc...
 
-Each script is described in the [tools help page](tools.md)
+Each script is described in the [tools help page](tools.html)
 
 The folder auto/ contains a single program, split over multiple files for
 simplicity. This program opens a simple GUI to define a test, including
