@@ -10,10 +10,10 @@ Content
 Crappy Tribometer V0.1 Documentation
 ====================================
 
-Welcome to the documentation of the LML breaking tribometer.
+Welcome to the documentation of the LML braking tribometer.
 
 The goal of this document is to provide user and developer level help for
-this Python program, meant to drive the breaking tribometer.
+this Python program, meant to drive the braking tribometer.
 It was developed by Victor Couty on Sept/Oct 2017.
 The code of this project is hosted on
 [GitHub](https://github.com/LaboratoireMecaniqueLille/Tribo.git).
@@ -35,7 +35,7 @@ the second by the code in tool/
 
 This project is based on
 [CRAPPY](https://github.com/LaboratoireMecaniqueLille/crappy.git),
-an other project developed by the LML.
+another project developed by the LML.
 
 Crappy is a Python module meant to run complex tests on a wide variety of
 hardware. For more information, please refer to the page of the project or

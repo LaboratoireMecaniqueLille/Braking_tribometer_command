@@ -71,7 +71,7 @@ brackets and eventually flattens the list (to allow for lists in lists).
 This frame does not try to handle exceptions if the eval() fails, this is done
 by go(), which prints errors in the help frame if any.
 
-### pectrum_frame.py
+### spectrum_frame.py
 This frame allows the user to configure the acquisition by the Spectrum
 card. It has several fields to represent a channel: You can name channels
 , set the range and eventually add a gain that will be saved as a metadata.
@@ -115,7 +115,7 @@ Their docstring will be displayed when clicked, the name will be the name of
 the function and the prototype will be generated automatically so the name
 of the arguments matters.
 To add a function, add its helper in funcs.py, with a good help docstring,
-an axplicit name and arguments. Add it to "__all__" at the top of the file
+an explicit name and arguments. Add it to "__all__" at the top of the file
 and "funcs" in the last section.
 Create the actual function (make_xx), that extends all the generators with
 the chosen commands. Finally, add them both to the 'avail' dict.
@@ -138,7 +138,7 @@ connection. If at least one channel is specified on the spectrum,
 it creates a spectrum block and a hdf_saver to save data from the spectrum.
 It uses functions from spectrum_tools.py to open the correct number of channels
 and plot data in real time (see spectrum_tools.py).
-If a lj2 channel is open, it will create an other IOBlock for the second
+If a lj2 channel is open, it will create another IOBlock for the second
 Labjack and a saver to save the data as csv. It will then create all the
 graphs, and link them to the correct parent blocks. Finally, if the user
 asked for it, it will create a 'Drawing' block based on pad_config.py and
@@ -146,7 +146,7 @@ start the program.
 
 lj1_chan.py
 -----------
-This file holds the cnofiguration for the main Labjack, which drives the
+This file holds the configuration for the main Labjack, which drives the
 actuators. This file is extremely short and simple: identifier is a string
 to identify the Labjack (here we used the serial number). in_chan and out_chan
 are dicts that hold the input and output channels. Note that the inputs
