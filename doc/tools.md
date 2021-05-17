@@ -1,10 +1,10 @@
 Content
 -------
 
-* [Main page](help.md)
-* [Hardware description](hardware.md)
-* [Auto mode interface](interface.md)
-* [Auto mode code description](auto.md)
+* [Main page](help.html)
+* [Hardware description](hardware.html)
+* [Auto mode interface](interface.html)
+* [Auto mode code description](auto.html)
 * Tools description (this page)
 
 manual_gui.py
