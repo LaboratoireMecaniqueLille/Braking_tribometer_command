@@ -2,10 +2,10 @@ Content
 -------
 
 * Main page (this page)
-* [Hardware description](hardware.md)
-* [Auto mode interface](interface.md)
-* [Auto mode code description](auto.md)
-* [Tools description](tools.md)
+* [Hardware description](hardware.html)
+* [Auto mode interface](interface.html)
+* [Auto mode code description](auto.html)
+* [Tools description](tools.html)
 
 Crappy Tribometer V0.1 Documentation
 ====================================
@@ -42,13 +42,13 @@ hardware. For more information, please refer to the page of the project or
 [the documentation](https://laboratoiremecaniquelille.github.io/crappy/).
 
 If you are reading this document to get familiar with this bench,
-I strongly suggest reading the [hardware help page](hardware.md) while
+I strongly suggest reading the [hardware help page](hardware.html) while
 analysing the bench in real time, then getting familiar with manual mode
-with [tools help page](tools.md) and finally read the
-[interface help page](interface.md) to learn how to use the auto program.
+with [tools help page](tools.html) and finally read the
+[interface help page](interface.html) to learn how to use the auto program.
 
 If you want to go deeper, you can consult the
-[auto mode help page](auto.md) to have an explanation of the global
+[auto mode help page](auto.html) to have an explanation of the global
 organization of the code. The next step is to look at the code itself,
 it is organized and commented for an easier understanding.
 
@@ -81,7 +81,7 @@ And many sensors:
 * Position sensor for the disc and the pad
 
 For more details on the hardware, please refer to the
-[hardware help page](hardware.md)
+[hardware help page](hardware.html)
 
 Software overview
 =================
@@ -96,6 +96,6 @@ simplicity. This program opens a simple GUI to define a test, including
 the description of the whole test, configuration of all the sensors and
 the real-time graphs to display. It can be started by launching auto/main.py
 
-For user documentation, see [interface help page](interface.md).
+For user documentation, see [interface help page](interface.html).
 For more in depth description of the code, see
-[auto mode help page](auto.md)
+[auto mode help page](auto.html)
